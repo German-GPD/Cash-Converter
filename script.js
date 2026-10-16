@@ -6,17 +6,33 @@ const ASSETS=[
  {code:"BYN",name:"Белорусский рубль",icon:"🇧🇾",kind:"fiat",digits:2},
  {code:"PLN",name:"Польский злотый",icon:"🇵🇱",kind:"fiat",digits:2},
  {code:"BTC",name:"Bitcoin",icon:"₿",kind:"crypto",digits:8},
- {code:"XAU",name:"Золото · тройская унция",icon:"🟡",kind:"metal",digits:4},
+ {code:"XAU",name:"Золото · 1 грамм",icon:"✳",kind:"metal",digits:4},
  {code:"CNY",name:"Китайский юань",icon:"🇨🇳",kind:"fiat",digits:2}
 ];
 const $=id=>document.getElementById(id);
 const API={
  primary:"https://open.er-api.com/v6/latest/USD",
+ belarusbank:"https://belarusbank.by/api/kursExchange",
  secondary:code=>"https://api.frankfurter.dev/v2/rate/USD/"+code,
  bitcoin:"https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd",
  gold:"https://api.gold-api.com/price/XAU"
 };
-let rates={USD:{value:1,sources:[{name:"USD base",value:1}]}},sourceState={primary:false,secondary:{},btc:false,gold:false},lastUpdated=null,activeCode="USD",loading=false,toastTimer=null,refreshId=0;
+let rates={USD:{value:1,sources:[{name:"USD base",value:1}]}},sourceState={primary:false,secondary:{},btc:false,gold:false,belarusbank:false},lastUpdated=null,activeCode="USD",loading=false,toastTimer=null,refreshId=0;
+const THEME_KEY="gpd-cash-theme";
+const THEME_MODES=["auto","light","dark"];
+const THEME_GLYPHS={auto:"◐",light:"☼",dark:"☾"};
+function applyTheme(mode,announce=false){
+ if(!THEME_MODES.includes(mode))mode="auto";
+ document.documentElement.dataset.theme=mode;
+ document.documentElement.style.colorScheme=mode==="auto"?"light dark":mode;
+ try{localStorage.setItem(THEME_KEY,mode)}catch(_){}
+ const b=$("themeButton"),names={auto:"Авто",light:"Светлая",dark:"Тёмная"};
+ if(b){b.textContent=THEME_GLYPHS[mode];b.title="Тема: "+names[mode]+" · нажми, чтобы сменить";b.setAttribute("aria-label","Тема: "+names[mode])}
+ const meta=document.querySelector('meta[name="theme-color"]');
+ if(meta)meta.content=mode==="light"?"#e9eee8":mode==="dark"?"#090c0a":(matchMedia("(prefers-color-scheme: dark)").matches?"#090c0a":"#e9eee8");
+ if(announce)showToast("Тема: "+names[mode]);
+}
+function cycleTheme(){let current="auto";try{current=localStorage.getItem(THEME_KEY)||"auto"}catch(_){}applyTheme(THEME_MODES[(THEME_MODES.indexOf(current)+1)%THEME_MODES.length],true)}
 const list=$("currencyList");
 function fmt(n,d=2){if(!Number.isFinite(n))return"—";return new Intl.NumberFormat("ru-RU",{maximumFractionDigits:d,minimumFractionDigits:0}).format(n)}
 function parseValue(v){if(typeof v!=="string")return null;const s=v.trim().replace(/\s/g,"").replace(",",".");if(!s)return null;const n=Number(s);return Number.isFinite(n)&&n>=0?n:null}
@@ -76,6 +92,22 @@ async function getSecondary(){
  }));
  const out={};results.forEach(r=>{if(r.status==="fulfilled")out[r.value.code]=r.value});return out;
 }
+async function getBelarusbank(){
+ // City-specific bank cash rates are optional: Belarusbank may block cross-origin browser requests.
+ const url=API.belarusbank+"?"+new URLSearchParams({city:"Орша",currency:"USD"});
+ const d=await getJSON(url,6500);
+ const queue=[d];let midpoint=null;
+ while(queue.length){
+  const item=queue.shift();if(!item||typeof item!=="object")continue;
+  const fields={};for(const [key,value] of Object.entries(item))fields[key.toLowerCase()]=value;
+  const buy=Number(fields.usd_in??fields.buy??fields.in??fields.rate_in);
+  const sell=Number(fields.usd_out??fields.sell??fields.out??fields.rate_out);
+  if(Number.isFinite(buy)&&buy>0&&Number.isFinite(sell)&&sell>0){midpoint=(buy+sell)/2;break}
+  for(const value of Object.values(item))if(value&&typeof value==="object")queue.push(value);
+ }
+ if(!Number.isFinite(midpoint)||midpoint<=0)throw Error("Belarusbank response not recognised");
+ return midpoint;
+}
 async function getMarket(){
  const results=await Promise.allSettled([
   getJSON(API.bitcoin,8500).then(d=>{const n=Number(d?.bitcoin?.usd);if(!Number.isFinite(n)||n<=0)throw Error("BTC quote invalid");return n}),
@@ -90,6 +122,7 @@ function refreshSourceInfo(){
  $("sourcePrimary").textContent=sourceState.primary?"Подключён · фиатные курсы":"Нет данных";
  const checked=Object.keys(sourceState.secondary);
  $("sourceSecondary").textContent=checked.length?"Доступно: "+checked.join(", "):"Второй источник не вернул данные";
+ $("sourceBelarusbank").textContent=sourceState.belarusbank?"Подключён · Орша · среднее покупки/продажи":"Недоступен в браузере или ответ не распознан";
  $("sourceBTC").textContent=sourceState.btc?"Котировка доступна":"Котировка недоступна";
  $("sourceGold").textContent=sourceState.gold?"Котировка доступна":"Котировка недоступна";
  const ok=Number(sourceState.primary)+Number(sourceState.btc)+Number(sourceState.gold);
@@ -97,17 +130,19 @@ function refreshSourceInfo(){
 }
 async function refreshAll(){
  if(loading)return;loading=true;const id=++refreshId;$("refreshButton").disabled=true;document.body.classList.add("loading");setStatus("Получаем курсы из нескольких источников…");setLive("Проверяем…");
- const [p,s,m]=await Promise.allSettled([getPrimary(),getSecondary(),getMarket()]);
+ const [p,s,m,b]=await Promise.allSettled([getPrimary(),getSecondary(),getMarket(),getBelarusbank()]);
  if(id!==refreshId)return;
  const candidates={USD:[{name:"USD base",value:1}]};
  sourceState.primary=p.status==="fulfilled";
  if(p.status==="fulfilled"){Object.entries(p.value.rates).forEach(([code,value])=>addCandidate(candidates,code,value,"ExchangeRate-API"));lastUpdated=p.value.updated}
  sourceState.secondary=s.status==="fulfilled"?s.value:{};
  Object.entries(sourceState.secondary).forEach(([code,item])=>addCandidate(candidates,code,item.value,"Frankfurter"));
+ sourceState.belarusbank=b.status==="fulfilled";
+ if(sourceState.belarusbank)addCandidate(candidates,"BYN",b.value,"Беларусбанк · Орша, средний наличный курс");
  const market=m.status==="fulfilled"?m.value:{btc:null,gold:null};
  sourceState.btc=Number.isFinite(market.btc);sourceState.gold=Number.isFinite(market.gold);
  if(market.btc)addCandidate(candidates,"BTC",1/market.btc,"CoinGecko");
- if(market.gold)addCandidate(candidates,"XAU",1/market.gold,"Gold-API");
+ if(market.gold)addCandidate(candidates,"XAU",31.1034768/market.gold,"Gold-API · грамм на USD");
  const next={};
  for(const a of ASSETS){const entries=candidates[a.code]||[];if(entries.length)next[a.code]={value:average(entries),sources:entries}}
  next.USD={value:1,sources:candidates.USD||[{name:"USD base",value:1}]};
@@ -127,6 +162,9 @@ async function refreshAll(){
  loading=false;$("refreshButton").disabled=false;document.body.classList.remove("loading");
 }
 function showToast(message){const t=$("toast");t.textContent=message;t.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),1900)}
+$("themeButton").addEventListener("click",cycleTheme);
+try{applyTheme(localStorage.getItem(THEME_KEY)||"auto")}catch(_){applyTheme("auto")}
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",()=>{let mode="auto";try{mode=localStorage.getItem(THEME_KEY)||"auto"}catch(_){}if(mode==="auto")applyTheme("auto")});
 $("refreshButton").addEventListener("click",refreshAll);
 $("resetButton").addEventListener("click",()=>{ASSETS.forEach(a=>$("amount-"+a.code).value="");activeCode="USD";$("amount-USD").value="1";activate("USD");convertFrom("USD","1");showToast("Суммы сброшены")});
 $("sourceToggle").addEventListener("click",()=>{const open=$("sourceToggle").getAttribute("aria-expanded")!=="true";$("sourceToggle").setAttribute("aria-expanded",String(open));$("sourcePanel").hidden=!open;$("sourceArrow").textContent=open?"−":"＋"});
