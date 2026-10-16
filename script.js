@@ -20,6 +20,12 @@ const API={
  gold:"https://api.gold-api.com/price/XAU"
 };
 let rates={USD:{value:1,sources:[{name:"USD base",value:1}]}},sourceState={primary:false,secondary:{},btc:false,gold:false,belarusbank:false},lastUpdated=null,activeCode="USD",loading=false,toastTimer=null,refreshId=0;
+const HISTORY_KEY="gpd-cash-history-v1";
+const CHART_COLORS={USD:"#77c9ff",EUR:"#8d9bff",RUB:"#ff8f9e",BYN:"#7ee0a3",PLN:"#ffc66d",GBP:"#b69cff",KZT:"#65d9d0",BTC:"#ffad66",XAU:"#f0d36b",CNY:"#ff86c8"};
+function readHistory(){try{const v=JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]");return Array.isArray(v)?v.filter(x=>x&&Number.isFinite(x.t)&&x.p&&typeof x.p==="object"):[]}catch(_){return[]}}
+function recordHistory(){const now=Date.now(),prices={};for(const a of ASSETS){const rate=rates[a.code]?.value;if(Number.isFinite(rate)&&rate>0)prices[a.code]=1/rate}if(!Object.keys(prices).length)return;const hist=readHistory(),last=hist[hist.length-1];if(last&&now-last.t<900000){last.t=now;last.p=prices}else hist.push({t:now,p:prices});try{localStorage.setItem(HISTORY_KEY,JSON.stringify(hist.slice(-120)))}catch(_){}}
+function sparkline(values){const w=160,h=42,pad=3,nums=values.filter(Number.isFinite);if(!nums.length)return"";if(nums.length===1)return '<svg class="chart-spark" viewBox="0 0 160 42" preserveAspectRatio="none" aria-hidden="true"><path d="M3 21 L157 21" opacity=".18"/><circle cx="157" cy="21" r="3"/></svg>';const min=Math.min(...nums),max=Math.max(...nums),span=max-min||Math.max(Math.abs(max)*.002,1e-12);const pts=nums.map((v,i)=>[pad+i*(w-pad*2)/(nums.length-1),h-pad-((v-min)/span)*(h-pad*2)]);const line=pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(2)+" "+p[1].toFixed(2)).join(" "),area=line+" L"+pts[pts.length-1][0].toFixed(2)+" "+(h-pad)+" L"+pts[0][0].toFixed(2)+" "+(h-pad)+" Z",last=pts[pts.length-1];return '<svg class="chart-spark" viewBox="0 0 160 42" preserveAspectRatio="none" aria-hidden="true"><path class="spark-area" d="'+area+'"/><path d="'+line+'"/><circle cx="'+last[0]+'" cy="'+last[1]+'" r="3"/></svg>'}
+function renderCharts(){const grid=$("chartGrid");if(!grid)return;const hist=readHistory();$("chartSummary").textContent=hist.length>1?hist.length+" сохранённых точек · "+new Date(hist[0].t).toLocaleDateString("ru-RU")+" — "+new Date(hist[hist.length-1].t).toLocaleDateString("ru-RU"):"Первая точка сохранена · динамика проявится после следующих обновлений";grid.innerHTML=ASSETS.map((a,i)=>{const rate=rates[a.code]?.value,price=Number.isFinite(rate)&&rate>0?1/rate:null,series=hist.map(x=>Number(x.p[a.code])).filter(v=>Number.isFinite(v)&&v>0),first=series[0],last=series[series.length-1],change=series.length>1&&first>0?(last/first-1)*100:null;const changeHTML=change===null?'<span class="chart-change neutral">· собираем</span>':'<span class="chart-change">'+(change>0?"↗ ":change<0?"↘ ":"→ ")+(change>0?"+":"")+change.toLocaleString("ru-RU",{maximumFractionDigits:2})+'%</span>',priceHTML=price===null?"Нет курса":'$'+new Intl.NumberFormat("ru-RU",{maximumFractionDigits:a.code==="BTC"?0:a.code==="XAU"?2:6,minimumFractionDigits:0}).format(price),detail=series.length>1?"За период":"Цена за 1 "+(a.code==="XAU"?"г":a.code);return '<article class="chart-card glass" style="--chart-color:'+(CHART_COLORS[a.code]||"#8d9bff")+';--chart-i:'+i+'"><div class="chart-top"><div class="chart-asset"><span class="chart-asset-icon">'+a.icon+'</span><div><div class="chart-code">'+a.code+'</div><div class="chart-name">'+a.name+'</div></div></div><i class="chart-light" aria-hidden="true"></i></div><div class="chart-price">'+priceHTML+' <small>USD</small></div>'+(series.length?sparkline(series):'<div class="chart-empty">Ожидаем доступный курс</div>')+'<div class="chart-foot"><span>'+detail+'</span>'+changeHTML+'</div></article>'}).join("")}
 const THEME_KEY="gpd-cash-theme";
 const THEME_MODES=["auto","light","dark"];
 const THEME_GLYPHS={auto:"◐",light:"☼",dark:"☾"};
@@ -40,8 +46,9 @@ function renderPicker(){
  $("currencyPicker").innerHTML=ASSETS.map(a=>'<button type="button" class="currency-chip" data-code="'+a.code+'" aria-pressed="'+(a.code===activeCode)+'"><span class="chip-icon">'+a.icon+'</span>'+a.code+'</button>').join("");
  $("currencyPicker").querySelectorAll("[data-code]").forEach(b=>b.addEventListener("click",()=>activate(b.dataset.code)));
 }
+function amountHTML(n,d=2){if(!Number.isFinite(n))return "—";const parts=new Intl.NumberFormat("ru-RU",{maximumFractionDigits:d,minimumFractionDigits:0}).format(n).split(",");return '<span class="amount-major">'+parts[0]+'</span>'+(parts[1]?'<span class="amount-minor">,'+parts[1]+'</span>':"")}
 function renderRows(){
- list.innerHTML=ASSETS.map((a,i)=>'<div class="currency-row '+(a.code===activeCode?"active":"")+'" data-row="'+a.code+'" style="--i:'+i+'"><div class="currency-info"><div class="currency-icon">'+a.icon+'</div><div><div class="currency-symbol">'+a.code+'</div><div class="currency-name">'+a.name+'</div></div></div><div class="result-amount" id="result-'+a.code+'">—<span class="result-unit">'+(a.code==="XAU"?"г золота":a.code)+'</span></div><button class="copy-button" type="button" data-copy="'+a.code+'" aria-label="Скопировать сумму в '+a.code+'"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg></button></div>').join("");
+ list.innerHTML=ASSETS.map((a,i)=>'<div class="currency-row '+(a.code===activeCode?"active":"")+'" data-row="'+a.code+'" style="--i:'+i+'"><div class="currency-info"><div class="currency-icon">'+a.icon+'</div><div><div class="currency-symbol">'+a.code+'</div><div class="currency-name">'+a.name+'</div></div></div><div class="amount-wrap"><div class="result-amount" id="result-'+a.code+'">'+amountHTML(null)+'</div><span class="result-unit">'+(a.code==="XAU"?"г золота":a.code)+'</span></div><button class="copy-button" type="button" data-copy="'+a.code+'" aria-label="Скопировать сумму в '+a.code+'"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg></button></div>').join("");
  list.querySelectorAll("[data-copy]").forEach(b=>b.addEventListener("click",()=>{const code=b.dataset.copy,n=converted(code);if(n===null){showToast("Курс пока недоступен");return}const value=fmt(n,ASSETS.find(a=>a.code===code).digits);if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(value).then(()=>showToast("Скопировано: "+value+" "+code)).catch(()=>showToast(value+" "+code));else showToast(value+" "+code)}));
 }
 function converted(code){
@@ -54,7 +61,7 @@ function updateResults(){
  const raw=$("sourceAmount").value.trim().replace(/\s/g,"").replace(",",".");
  const amount=raw===""||!Number.isFinite(Number(raw))||Number(raw)<0?null:Number(raw);
  $("resultsCaption").textContent="из "+(amount===null?"—":fmt(amount,8))+" "+activeCode;
- for(const a of ASSETS){const el=$("result-"+a.code);if(!el)continue;const n=converted(a.code);el.innerHTML=(n===null?"—":fmt(n,a.digits))+'<span class="result-unit">'+(a.code==="XAU"?"г золота":a.code)+'</span>';list.querySelector('[data-row="'+a.code+'"]').classList.toggle("active",a.code===activeCode)}
+ for(const a of ASSETS){const el=$("result-"+a.code);if(!el)continue;const n=converted(a.code);el.innerHTML=amountHTML(n,a.digits);list.querySelector('[data-row="'+a.code+'"]').classList.toggle("active",a.code===activeCode)}
 }
 function activate(code){
  activeCode=code;
@@ -152,7 +159,7 @@ async function refreshAll(){
  for(const a of ASSETS){const entries=candidates[a.code]||[];if(entries.length)next[a.code]={value:average(entries),sources:entries}}
  next.USD={value:1,sources:candidates.USD||[{name:"USD base",value:1}]};
  if(next.USD)rates=next;
- refreshSourceInfo();updateResults();updatePair();
+ if(p.status==="fulfilled")recordHistory();refreshSourceInfo();updateResults();updatePair();renderCharts();
  const available=Object.keys(rates).length;
  if(p.status==="fulfilled"){
   const averaged=Object.values(rates).filter(r=>r.sources.length>1).length;
@@ -175,4 +182,4 @@ $("refreshButton").addEventListener("click",refreshAll);
 $("resetButton").addEventListener("click",()=>{$("sourceAmount").value="1";activate("USD");showToast("Сброшено к 1 USD")});
 $("sourceToggle").addEventListener("click",()=>{const open=$("sourceToggle").getAttribute("aria-expanded")!=="true";$("sourceToggle").setAttribute("aria-expanded",String(open));$("sourcePanel").hidden=!open;$("sourceArrow").textContent=open?"−":"＋"});
 $("year").textContent=new Date().getFullYear();$("assetCount").textContent=ASSETS.length+" активов";
-renderPicker();renderRows();activate("USD");refreshAll();
+renderPicker();renderRows();activate("USD");renderCharts();refreshAll();
