@@ -3,46 +3,96 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#10121c">
-  <meta name="description" content="Cash Converter — красивый конвертер валют с актуальными обменными курсами.">
-  <title>Cash Converter — Currency exchange</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='85'%3E💱%3C/text%3E%3C/svg%3E">
+  <meta name="theme-color" content="#080a10">
+  <meta name="description" content="Cash Converter от German / GPD — конвертер USD, EUR, RUB, BYN, PLN, CNY, Bitcoin и золота с проверкой курсов по независимым источникам.">
+  <title>Cash Converter — by German / GPD</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23181b26'/%3E%3Ctext x='50' y='69' font-size='60' text-anchor='middle' fill='%23b8f7d4'%3E%E2%86%84%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="script.js" defer></script>
 </head>
 <body>
-  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div><div class="grain"></div>
+  <div class="backdrop-glow glow-a"></div><div class="backdrop-glow glow-b"></div>
   <header class="topbar">
-    <a class="brand" href="./" aria-label="Cash Converter home"><span class="brand-icon">↗</span><span>cash<span class="brand-light">converter</span></span></a>
-    <div class="top-actions"><span class="live-dot"></span><span class="live-label" id="liveLabel">Live exchange rates</span><button class="icon-button" id="refreshButton" aria-label="Обновить курсы" title="Обновить курсы">↻</button></div>
+    <a class="brand" href="./" aria-label="Cash Converter — главная">
+      <span class="brand-mark">↔</span><span class="brand-name">cash<span>converter</span><small>BY GPD</small></span>
+    </a>
+    <div class="header-right">
+      <span class="live-status"><i id="liveDot"></i><span id="liveLabel">Проверяем источники</span></span>
+      <button class="icon-button" id="refreshButton" aria-label="Обновить все курсы" title="Обновить курсы">↻</button>
+    </div>
   </header>
+
   <main>
-    <section class="intro">
-      <div class="eyebrow"><span class="eyebrow-line"></span> SIMPLE. SMART. GLOBAL.</div>
-      <h1>Money moves.<br><span>Make it count.</span></h1>
-      <p class="intro-copy">Конвертируй валюты без лишних движений.<br class="desktop-break"> Актуальные курсы — в одном красивом месте.</p>
+    <section class="hero">
+      <div class="eyebrow"><span></span> MONEY, WITHOUT THE FRICTION</div>
+      <h1>Курс под<br><em>контролем.</em></h1>
+      <p>Валюта, крипта и золото — в одном конвертере.<br class="desktop-only"> Курсы сверяются там, где доступны независимые данные.</p>
     </section>
-    <section class="converter glass-panel" aria-label="Конвертер валют">
-      <div class="panel-top"><div><span class="panel-kicker">CURRENCY CONVERTER</span><h2>Конвертация</h2></div><span class="secure-chip"><span>✦</span> Free to use</span></div>
-      <div class="currency-card">
-        <div class="field-heading"><label for="amount">Вы отправляете</label><span id="fromName">US Dollar</span></div>
-        <div class="field-row"><input id="amount" type="number" min="0" step="any" value="100" inputmode="decimal" autocomplete="off" aria-label="Сумма для конвертации"><div class="currency-select-wrap"><span class="flag" id="fromFlag">🇺🇸</span><select id="fromCurrency" aria-label="Исходная валюта"><option value="USD">USD</option></select><span class="select-chevron">⌄</span></div></div>
-        <div class="quick-amounts" aria-label="Быстрый выбор суммы"><button data-amount="100" class="quick active">$100</button><button data-amount="500">$500</button><button data-amount="1000">$1,000</button><button data-amount="5000">$5,000</button></div>
+
+    <section class="converter glass" aria-label="Конвертер валют и активов">
+      <div class="section-heading">
+        <div><div class="overline">SMART CONVERSION</div><h2>Конвертер</h2></div>
+        <span class="secure-label"><span>✳</span> 8 активов</span>
       </div>
-      <div class="swap-row"><span class="swap-line"></span><button id="swapButton" class="swap-button" aria-label="Поменять валюты местами" title="Поменять валюты местами">⇅</button><span class="swap-line"></span></div>
-      <div class="currency-card result-card">
-        <div class="field-heading"><label for="result">Вы получаете</label><span id="toName">Euro</span></div>
-        <div class="field-row"><output id="result" class="result-value" aria-live="polite">—</output><div class="currency-select-wrap"><span class="flag" id="toFlag">🇪🇺</span><select id="toCurrency" aria-label="Целевая валюта"><option value="EUR">EUR</option></select><span class="select-chevron">⌄</span></div></div>
-        <div class="result-bottom"><span class="result-caption">Ориентировочная сумма</span><button id="copyButton" class="copy-button" title="Скопировать результат">▢ <span>Копировать</span></button></div>
+
+      <div class="asset-block source-block">
+        <div class="asset-label"><label for="amount">У меня есть</label><span id="fromName">Доллар США</span></div>
+        <div class="input-row">
+          <input id="amount" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="100" aria-label="Сумма исходного актива">
+          <div class="asset-picker"><span class="asset-icon" id="fromIcon">🇺🇸</span><select id="fromCurrency" aria-label="Исходный актив"></select><span class="chevron">⌄</span></div>
+        </div>
+        <div class="quick-values" aria-label="Быстрый выбор суммы">
+          <button type="button" data-amount="10">10</button><button type="button" data-amount="100" class="selected">100</button><button type="button" data-amount="1000">1 000</button><button type="button" data-amount="10000">10 000</button>
+        </div>
       </div>
-      <div class="rate-strip"><span class="rate-icon">↗</span><div><span class="rate-label">Обменный курс</span><strong id="rateText">Загружаем курс…</strong></div><span class="rate-date" id="rateDate">—</span></div>
-      <div id="status" class="status" role="status">Подключаемся к сервису курсов…</div>
+
+      <div class="swap-divider"><span></span><button type="button" id="swapButton" aria-label="Поменять активы местами" title="Поменять активы местами"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v18M3.5 6.5 7 3l3.5 3.5M17 21V3m-3.5 14.5L17 21l3.5-3.5"/></svg></button><span></span></div>
+
+      <div class="asset-block target-block">
+        <div class="asset-label"><label for="result">Получится</label><span id="toName">Евро</span></div>
+        <div class="input-row">
+          <output id="result" class="result-value" aria-live="polite">—</output>
+          <div class="asset-picker"><span class="asset-icon" id="toIcon">🇪🇺</span><select id="toCurrency" aria-label="Целевой актив"></select><span class="chevron">⌄</span></div>
+        </div>
+        <div class="result-footer"><span id="resultHint">Ориентировочная сумма</span><button type="button" id="copyButton" class="copy-button"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg><span>Копировать</span></button></div>
+      </div>
+
+      <div class="rate-summary">
+        <div class="rate-symbol">↗</div>
+        <div class="rate-main"><span>Курс пары</span><strong id="rateText">Загружаем…</strong><small id="rateMeta">Данные проверяются</small></div>
+        <div class="rate-check" id="checkBadge"><i></i><span>Проверка</span></div>
+      </div>
+
+      <div class="source-details">
+        <button type="button" class="source-toggle" id="sourcesToggle" aria-expanded="false"><span>Источники и точность</span><span id="sourcesChevron">＋</span></button>
+        <div id="sourcesPanel" class="sources-panel" hidden>
+          <div class="source-line"><span class="source-bullet"></span><div><strong>ExchangeRate-API</strong><small id="primaryStatus">Основной источник валют</small></div><a href="https://www.exchangerate-api.com/" target="_blank" rel="noopener noreferrer">Открыть ↗</a></div>
+          <div class="source-line"><span class="source-bullet secondary"></span><div><strong>Frankfurter / ECB</strong><small id="secondaryStatus">Независимая сверка доступных валют</small></div><a href="https://frankfurter.dev/" target="_blank" rel="noopener noreferrer">Открыть ↗</a></div>
+          <div class="source-line"><span class="source-bullet market"></span><div><strong>Рыночные активы</strong><small id="marketStatus">Bitcoin и золото — отдельные котировки</small></div><a href="https://www.coingecko.com/" target="_blank" rel="noopener noreferrer">CoinGecko ↗</a></div>
+          <p class="source-note">Сверка показывает разницу между источниками, если оба источника предоставили курс. Курсы справочные, могут обновляться с задержкой и не являются банковской котировкой или гарантией цены сделки.</p>
+        </div>
+      </div>
+      <div id="status" class="status" role="status">Подключаемся к источникам…</div>
     </section>
-    <section class="trust-row"><div class="trust-item"><span class="trust-icon">◷</span><div><strong>Свежие данные</strong><span>Курс с датой обновления</span></div></div><div class="trust-item"><span class="trust-icon">◎</span><div><strong>Без регистрации</strong><span>Открывай и конвертируй</span></div></div><div class="trust-item"><span class="trust-icon">↔</span><div><strong>Много валют</strong><span>Популярные валюты мира</span></div></div></section>
+
+    <section class="feature-row" aria-label="Особенности">
+      <div class="feature"><span class="feature-icon">⌁</span><div><strong>Сверка курсов</strong><small>Второе мнение, где доступно</small></div></div>
+      <div class="feature"><span class="feature-icon">◈</span><div><strong>8 активов</strong><small>Фиат, BTC и золото</small></div></div>
+      <div class="feature"><span class="feature-icon">↗</span><div><strong>Мгновенно</strong><small>Пересчёт при вводе</small></div></div>
+    </section>
   </main>
-  <footer><a class="footer-brand" href="https://github.com/German-GPD">GPD <span>STUDIO</span></a><span>Made with care by German · Rates provided by ExchangeRate-API</span><a href="https://github.com/German-GPD/Cash-Converter" target="_blank" rel="noreferrer">View source ↗</a></footer>
+
+  <footer class="footer">
+    <div class="footer-owner"><a class="owner-mark" href="https://github.com/German-GPD" target="_blank" rel="noopener noreferrer">G</a><div><strong>Сделано German <span>/ GPD</span></strong><small>Независимый проект · создан с вниманием к деталям</small></div></div>
+    <nav class="footer-links" aria-label="Ссылки автора">
+      <a href="https://german-gpd.github.io/about-german/" target="_blank" rel="noopener noreferrer">Мой сайт ↗</a>
+      <a href="https://github.com/German-GPD/Cash-Converter" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+      <a href="https://t.me/redfox_g56" target="_blank" rel="noopener noreferrer">Telegram ↗</a>
+    </nav>
+    <div class="footer-bottom"><span>© <span id="year"></span> German / GPD</span><span>Курсы для ознакомления · Не финансовый совет</span></div>
+  </footer>
 </body>
 </html>
