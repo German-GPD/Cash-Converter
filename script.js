@@ -150,7 +150,7 @@ async function refreshAll(){
  for(const a of ASSETS){const entries=candidates[a.code]||[];if(entries.length)next[a.code]={value:average(entries),sources:entries}}
  next.USD={value:1,sources:candidates.USD||[{name:"USD base",value:1}]};
  if(next.USD)rates=next;
- refreshSourceInfo();updateSubs();updatePair();
+ refreshSourceInfo();updateResults();updatePair();
  const available=Object.keys(rates).length;
  if(p.status==="fulfilled"){
   const averaged=Object.values(rates).filter(r=>r.sources.length>1).length;
@@ -174,4 +174,3 @@ $("resetButton").addEventListener("click",()=>{$("sourceAmount").value="1";activ
 $("sourceToggle").addEventListener("click",()=>{const open=$("sourceToggle").getAttribute("aria-expanded")!=="true";$("sourceToggle").setAttribute("aria-expanded",String(open));$("sourcePanel").hidden=!open;$("sourceArrow").textContent=open?"−":"＋"});
 $("year").textContent=new Date().getFullYear();$("assetCount").textContent=ASSETS.length+" активов";
 renderPicker();renderRows();activate("USD");refreshAll();
-renderRows();convertFrom("USD","1");refreshAll();
