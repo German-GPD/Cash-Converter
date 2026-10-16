@@ -125,14 +125,14 @@ function refreshSourceInfo(){
  $("sourceBelarusbank").textContent=sourceState.belarusbank?"Подключён · Орша · среднее покупки/продажи":"Недоступен в браузере или ответ не распознан";
  $("sourceBTC").textContent=sourceState.btc?"Котировка доступна":"Котировка недоступна";
  $("sourceGold").textContent=sourceState.gold?"Котировка доступна":"Котировка недоступна";
- const ok=Number(sourceState.primary)+Number(sourceState.btc)+Number(sourceState.gold);
+ const ok=Number(sourceState.primary)+Number(Object.keys(sourceState.secondary).length>0)+Number(sourceState.btc)+Number(sourceState.gold)+Number(sourceState.belarusbank);
  setLive(ok>=2?"Источники доступны":ok===1?"Часть источников доступна":"Нет соединения",ok>=2?"good":ok===0?"bad":"");
 }
 async function refreshAll(){
  if(loading)return;loading=true;const id=++refreshId;$("refreshButton").disabled=true;document.body.classList.add("loading");setStatus("Получаем курсы из нескольких источников…");setLive("Проверяем…");
  const [p,s,m,b]=await Promise.allSettled([getPrimary(),getSecondary(),getMarket(),getBelarusbank()]);
  if(id!==refreshId)return;
- const candidates={USD:[{name:"USD base",value:1}]};
+ const candidates={};
  sourceState.primary=p.status==="fulfilled";
  if(p.status==="fulfilled"){Object.entries(p.value.rates).forEach(([code,value])=>addCandidate(candidates,code,value,"ExchangeRate-API"));lastUpdated=p.value.updated}
  sourceState.secondary=s.status==="fulfilled"?s.value:{};
