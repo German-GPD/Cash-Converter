@@ -14,7 +14,7 @@
 
 ## 🇷🇺 О проекте
 
-Cash Converter — минималистичный конвертер валют, Bitcoin и золота с автоматической светлой/тёмной темой и интерфейсом в духе Apple: стеклянные панели, квадратная геометрия и тонкая пиксельная сетка.
+Cash Converter — минималистичный конвертер валют, Bitcoin и золота с режимами темы «Авто», «Светлая» и «Тёмная» и интерфейсом в духе Apple: стеклянные панели, квадратная геометрия и тонкая пиксельная сетка.
 
 ### Что умеет
 
@@ -22,27 +22,32 @@ Cash Converter — минималистичный конвертер валют,
 - Ввод суммы в любую строку пересчитывает остальные активы.
 - Курсы из доступных источников усредняются, если источников больше одного.
 - Показывает, когда есть только один источник и сверка недоступна.
-- Адаптация под системную тему и размер экрана.
+- Авто-тема по настройке устройства, ручное переключение на светлую/тёмную тему и адаптация под экран.
 - Анимации появления, переключения исходной валюты и обновления данных.
 - Без фреймворков, сборки и ключей API.
 
 ### Источники
 
+- [Беларусбанк](https://belarusbank.by/ru/33139/forDevelopers/api/kursinfo) — дополнительная сверка наличного курса USD в Орше. Прямой браузерный доступ может блокироваться CORS; при недоступности приложение продолжает работать с другими источниками.
 - [ExchangeRate-API](https://www.exchangerate-api.com/) — основной фиатный источник.
 - [Frankfurter](https://frankfurter.dev/) — независимые курсы доступных валютных пар.
 - [CoinGecko](https://www.coingecko.com/) — цена Bitcoin в USD.
-- [Gold-API](https://www.gold-api.com/) — цена золота в USD за тройскую унцию.
+- [Gold-API](https://www.gold-api.com/) — цена золота в USD за тройскую унцию; приложение пересчитывает её в граммы.
 
-Среднее рассчитывается по доступным значениям в единой базе USD. Второй источник доступен не для всех валют; если он не возвращает данные, используется доступный курс и это отражается в интерфейсе. Курсы справочные, могут задерживаться или отличаться от банковских/биржевых цен. Золото указано за тройскую унцию. Это не финансовая рекомендация.
+Среднее рассчитывается по доступным значениям в единой базе USD. Второй источник доступен не для всех валют; если он не возвращает данные, используется доступный курс и это отражается в интерфейсе. Курсы справочные, могут задерживаться или отличаться от банковских/биржевых цен. Золото отображается за грамм (котировка API за тройскую унцию переводится в граммы). Это не финансовая рекомендация.
 
 ## 🇬🇧 About
 
-Cash Converter is a responsive currency, Bitcoin, and gold converter with system-matched light/dark appearance and an Apple-inspired glass UI.
+Cash Converter is a responsive currency, Bitcoin, and gold converter with Auto, light, and dark appearance modes and an Apple-inspired glass UI.
 
 - Type an amount into **any asset row** to update all other rows instantly.
 - Averages available independent quotes for the same asset.
 - Clearly reports when only one provider is available.
-- System theme support, motion details, responsive layout, no build step.
+- System theme by default, manual theme switching, animated ambient lighting, responsive layout, no build step.
+
+### Sources
+
+- Belarusbank — optional city-specific USD cash-rate cross-check for Orsha. Direct browser access may be blocked by CORS; other providers remain available as fallback.
 
 ### Author
 
