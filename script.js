@@ -5,6 +5,8 @@ const ASSETS=[
  {code:"RUB",name:"Российский рубль",icon:"🇷🇺",kind:"fiat",digits:2},
  {code:"BYN",name:"Белорусский рубль",icon:"🇧🇾",kind:"fiat",digits:2},
  {code:"PLN",name:"Польский злотый",icon:"🇵🇱",kind:"fiat",digits:2},
+ {code:"GBP",name:"Британский фунт",icon:"🇬🇧",kind:"fiat",digits:2},
+ {code:"KZT",name:"Казахстанский тенге",icon:"₸",kind:"fiat",digits:2},
  {code:"BTC",name:"Bitcoin",icon:"₿",kind:"crypto",digits:8},
  {code:"XAU",name:"Золото · 1 грамм",icon:"✳",kind:"metal",digits:4},
  {code:"CNY",name:"Китайский юань",icon:"🇨🇳",kind:"fiat",digits:2}
@@ -32,7 +34,7 @@ function applyTheme(mode,save=true){
 function cycleTheme(){let mode="auto";try{mode=localStorage.getItem(THEME_KEY)||"auto"}catch(_){}applyTheme(THEME_MODES[(THEME_MODES.indexOf(mode)+1)%THEME_MODES.length],true)}
 const list=$("currencyList");
 function fmt(n,d=2){if(!Number.isFinite(n))return"—";return new Intl.NumberFormat("ru-RU",{maximumFractionDigits:d,minimumFractionDigits:0}).format(n)}
-function parseValue(v){if(typeof v!=="string")return null;const s=v.trim().replace(/,/g,".").replace(/(?:BYN|USD|EUR|RUB|PLN|BTC|XAU|CNY|zł|₿|[$€₽¥])/gi,"").replace(/\s/g,"");if(!s)return null;const n=Number(s);return Number.isFinite(n)&&n>=0?n:null}
+function parseValue(v){if(typeof v!=="string")return null;const s=v.trim().replace(/,/g,".").replace(/(?:BYN|USD|EUR|RUB|PLN|GBP|KZT|BTC|XAU|CNY|zł|₿|[$€₽¥])/gi,"").replace(/\s/g,"");if(!s)return null;const n=Number(s);return Number.isFinite(n)&&n>=0?n:null}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function renderPicker(){
  $("currencyPicker").innerHTML=ASSETS.map(a=>'<button type="button" class="currency-chip" data-code="'+a.code+'" aria-pressed="'+(a.code===activeCode)+'"><span class="chip-icon">'+a.icon+'</span>'+a.code+'</button>').join("");
@@ -87,7 +89,7 @@ async function getPrimary(){
  return {rates:out,updated:d.time_last_update_utc||null};
 }
 async function getSecondary(){
- const codes=["EUR","PLN","CNY","RUB"];
+ const codes=["EUR","PLN","CNY","RUB","GBP"];
  const results=await Promise.allSettled(codes.map(async code=>{
   const d=await getJSON(API.secondary(code),7000);const value=Number(d.rate);
   if(!Number.isFinite(value)||value<=0)throw Error("Invalid quote");
