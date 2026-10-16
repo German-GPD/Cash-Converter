@@ -6,10 +6,11 @@ const ASSETS=[
  {code:"BYN",name:"Белорусский рубль",icon:"🇧🇾",kind:"fiat",digits:2},
  {code:"PLN",name:"Польский злотый",icon:"🇵🇱",kind:"fiat",digits:2},
  {code:"GBP",name:"Британский фунт",icon:"🇬🇧",kind:"fiat",digits:2},
- {code:"KZT",name:"Казахстанский тенге",icon:"₸",kind:"fiat",digits:2},
+ {code:"KZT",name:"Казахстанский тенге",icon:"🇰🇿",kind:"fiat",digits:2},
  {code:"BTC",name:"Bitcoin",icon:"₿",kind:"crypto",digits:8},
  {code:"XAU",name:"Золото · 1 грамм",icon:"✳",kind:"metal",digits:4},
- {code:"CNY",name:"Китайский юань",icon:"🇨🇳",kind:"fiat",digits:2}
+ {code:"CNY",name:"Китайский юань",icon:"🇨🇳",kind:"fiat",digits:2},
+ {code:"OIL",name:"Нефть Brent · 1 баррель",icon:"🛢️",kind:"commodity",digits:2}
 ];
 const $=id=>document.getElementById(id);
 const API={
@@ -17,15 +18,16 @@ const API={
  belarusbank:"https://belarusbank.by/api/kursExchange",
  secondary:code=>"https://api.frankfurter.dev/v2/rate/USD/"+code,
  bitcoin:"https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd",
- gold:"https://api.gold-api.com/price/XAU"
+ gold:"https://api.gold-api.com/price/XAU",
+ oil:"https://croncopia.com/api/energy/brent_crude.json"
 };
-let rates={USD:{value:1,sources:[{name:"USD base",value:1}]}},sourceState={primary:false,secondary:{},btc:false,gold:false,belarusbank:false},lastUpdated=null,activeCode="USD",loading=false,toastTimer=null,refreshId=0;
+let rates={USD:{value:1,sources:[{name:"USD base",value:1}]}},sourceState={primary:false,secondary:{},btc:false,gold:false,oil:false,belarusbank:false},lastUpdated=null,activeCode="USD",loading=false,toastTimer=null,refreshId=0;
 const HISTORY_KEY="gpd-cash-history-v1";
-const CHART_COLORS={USD:"#77c9ff",EUR:"#8d9bff",RUB:"#ff8f9e",BYN:"#7ee0a3",PLN:"#ffc66d",GBP:"#b69cff",KZT:"#65d9d0",BTC:"#ffad66",XAU:"#f0d36b",CNY:"#ff86c8"};
+const CHART_COLORS={USD:"#77c9ff",EUR:"#8d9bff",RUB:"#ff8f9e",BYN:"#7ee0a3",PLN:"#ffc66d",GBP:"#b69cff",KZT:"#65d9d0",OIL:"#a8ff60",BTC:"#ffad66",XAU:"#f0d36b",CNY:"#ff86c8"};
 function readHistory(){try{const v=JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]");return Array.isArray(v)?v.filter(x=>x&&Number.isFinite(x.t)&&x.p&&typeof x.p==="object"):[]}catch(_){return[]}}
 function recordHistory(){const now=Date.now(),prices={};for(const a of ASSETS){const rate=rates[a.code]?.value;if(Number.isFinite(rate)&&rate>0)prices[a.code]=1/rate}if(!Object.keys(prices).length)return;const hist=readHistory(),last=hist[hist.length-1];if(last&&now-last.t<900000){last.t=now;last.p=prices}else hist.push({t:now,p:prices});try{localStorage.setItem(HISTORY_KEY,JSON.stringify(hist.slice(-120)))}catch(_){}}
-function sparkline(values){const w=160,h=42,pad=3,nums=values.filter(Number.isFinite);if(!nums.length)return"";if(nums.length===1)return '<svg class="chart-spark" viewBox="0 0 160 42" preserveAspectRatio="none" aria-hidden="true"><path d="M3 21 L157 21" opacity=".18"/><circle cx="157" cy="21" r="3"/></svg>';const min=Math.min(...nums),max=Math.max(...nums),span=max-min||Math.max(Math.abs(max)*.002,1e-12);const pts=nums.map((v,i)=>[pad+i*(w-pad*2)/(nums.length-1),h-pad-((v-min)/span)*(h-pad*2)]);const line=pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(2)+" "+p[1].toFixed(2)).join(" "),area=line+" L"+pts[pts.length-1][0].toFixed(2)+" "+(h-pad)+" L"+pts[0][0].toFixed(2)+" "+(h-pad)+" Z",last=pts[pts.length-1];return '<svg class="chart-spark" viewBox="0 0 160 42" preserveAspectRatio="none" aria-hidden="true"><path class="spark-area" d="'+area+'"/><path d="'+line+'"/><circle cx="'+last[0]+'" cy="'+last[1]+'" r="3"/></svg>'}
-function renderCharts(){const grid=$("chartGrid");if(!grid)return;const hist=readHistory();$("chartSummary").textContent=hist.length>1?hist.length+" сохранённых точек · "+new Date(hist[0].t).toLocaleDateString("ru-RU")+" — "+new Date(hist[hist.length-1].t).toLocaleDateString("ru-RU"):hist.length===1?"Первая точка сохранена · динамика проявится после следующих обновлений":"Ожидаем первый снимок курса";grid.innerHTML=ASSETS.map((a,i)=>{const rate=rates[a.code]?.value,price=Number.isFinite(rate)&&rate>0?1/rate:null,series=hist.map(x=>Number(x.p[a.code])).filter(v=>Number.isFinite(v)&&v>0),first=series[0],last=series[series.length-1],change=series.length>1&&first>0?(last/first-1)*100:null;const changeHTML=change===null?'<span class="chart-change neutral">· собираем</span>':'<span class="chart-change">'+(change>0?"↗ ":change<0?"↘ ":"→ ")+(change>0?"+":"")+change.toLocaleString("ru-RU",{maximumFractionDigits:2})+'%</span>',priceHTML=price===null?"Нет курса":'$'+new Intl.NumberFormat("ru-RU",{maximumFractionDigits:a.code==="BTC"?0:a.code==="XAU"?2:6,minimumFractionDigits:0}).format(price),detail=series.length>1?"История обновлений":series.length===1?"Первый снимок":"Текущий снимок";return '<article class="chart-card glass" style="--chart-color:'+(CHART_COLORS[a.code]||"#8d9bff")+';--chart-i:'+i+'"><div class="chart-top"><div class="chart-asset"><span class="chart-asset-icon">'+a.icon+'</span><div><div class="chart-code">'+a.code+'</div><div class="chart-name">'+a.name+'</div></div></div><i class="chart-light" aria-hidden="true"></i></div><div class="chart-price">'+priceHTML+' <small>USD</small></div>'+(series.length?sparkline(series):(price!==null?sparkline([price]):'<div class="chart-empty">Ожидаем доступный курс</div>'))+'<div class="chart-foot"><span>'+detail+'</span>'+changeHTML+'</div></article>'}).join("")}
+function sparkline(values){const w=160,h=48,pad=5,nums=values.filter(v=>Number.isFinite(v)&&v>0);if(!nums.length)return"";const grid='<path class="spark-grid" d="M0 8H160 M0 24H160 M0 40H160"/>';if(nums.length===1)return '<svg class="chart-spark" viewBox="0 0 160 48" preserveAspectRatio="none" aria-hidden="true">'+grid+'<path class="spark-single" d="M3 24H157"/><circle cx="157" cy="24" r="3.5"/></svg>';const min=Math.min(...nums),max=Math.max(...nums),span=max-min||Math.max(Math.abs(max)*.002,1e-12);const pts=nums.map((v,i)=>[pad+i*(w-pad*2)/(nums.length-1),h-pad-((v-min)/span)*(h-pad*2)]);const line=pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(2)+" "+p[1].toFixed(2)).join(" "),area=line+" L"+pts[pts.length-1][0].toFixed(2)+" "+(h-pad)+" L"+pts[0][0].toFixed(2)+" "+(h-pad)+" Z",last=pts[pts.length-1];return '<svg class="chart-spark" viewBox="0 0 160 48" preserveAspectRatio="none" aria-hidden="true">'+grid+'<path class="spark-area" d="'+area+'"/><path class="spark-line" d="'+line+'"/><circle cx="'+last[0]+'" cy="'+last[1]+'" r="3.5"/></svg>'}
+function renderCharts(){const grid=$("chartGrid");if(!grid)return;const hist=readHistory();$("chartSummary").textContent=hist.length>1?hist.length+" сохранённых точек · "+new Date(hist[0].t).toLocaleDateString("ru-RU")+" — "+new Date(hist[hist.length-1].t).toLocaleDateString("ru-RU"):hist.length===1?"Первая точка сохранена · динамика проявится после следующих обновлений":"Ожидаем первый снимок курса";grid.innerHTML=ASSETS.map((a,i)=>{const rate=rates[a.code]?.value,price=Number.isFinite(rate)&&rate>0?1/rate:null,series=hist.map(x=>Number(x.p[a.code])).filter(v=>Number.isFinite(v)&&v>0),first=series[0],last=series[series.length-1],change=series.length>1&&first>0?(last/first-1)*100:null;const changeHTML=change===null?'<span class="chart-change neutral">'+(series.length===1?"● 1 точка":"● текущая цена")+'</span>':'<span class="chart-change">'+(change>0?"↗ ":change<0?"↘ ":"→ ")+(change>0?"+":"")+change.toLocaleString("ru-RU",{maximumFractionDigits:2})+'%</span>',priceHTML=price===null?"Нет курса":'$'+new Intl.NumberFormat("ru-RU",{maximumFractionDigits:a.code==="BTC"?0:a.code==="XAU"?2:6,minimumFractionDigits:0}).format(price),detail=series.length>1?"История обновлений":series.length===1?"Первый снимок":"График цены";return '<article class="chart-card glass" style="--chart-color:'+(CHART_COLORS[a.code]||"#8d9bff")+';--chart-i:'+i+'"><div class="chart-top"><div class="chart-asset"><span class="chart-asset-icon">'+a.icon+'</span><div><div class="chart-code">'+a.code+'</div><div class="chart-name">'+a.name+'</div></div></div><i class="chart-light" aria-hidden="true"></i></div><div class="chart-price">'+priceHTML+' <small>USD</small></div>'+(series.length?sparkline(series):(price!==null?sparkline([price]):'<div class="chart-empty">Ожидаем доступный курс</div>'))+'<div class="chart-foot"><span>'+detail+'</span>'+changeHTML+'</div></article>'}).join("")}
 const THEME_KEY="gpd-cash-theme";
 const THEME_MODES=["auto","light","dark"];
 const THEME_GLYPHS={auto:"◐",light:"☼",dark:"☾"};
@@ -123,9 +125,10 @@ async function getBelarusbank(){
 async function getMarket(){
  const results=await Promise.allSettled([
   getJSON(API.bitcoin,8500).then(d=>{const n=Number(d?.bitcoin?.usd);if(!Number.isFinite(n)||n<=0)throw Error("BTC quote invalid");return n}),
-  getJSON(API.gold,8500).then(d=>{const n=Number(d?.price);if(!Number.isFinite(n)||n<=0)throw Error("Gold quote invalid");return n})
+  getJSON(API.gold,8500).then(d=>{const n=Number(d?.price);if(!Number.isFinite(n)||n<=0)throw Error("Gold quote invalid");return n}),
+  getJSON(API.oil,8500).then(d=>{const n=Number(d?.price??d?.data?.price??d?.value);if(!Number.isFinite(n)||n<=0)throw Error("Oil quote invalid");return n})
  ]);
- return {btc:results[0].status==="fulfilled"?results[0].value:null,gold:results[1].status==="fulfilled"?results[1].value:null};
+ return {btc:results[0].status==="fulfilled"?results[0].value:null,gold:results[1].status==="fulfilled"?results[1].value:null,oil:results[2].status==="fulfilled"?results[2].value:null};
 }
 function average(entries){return entries.reduce((s,e)=>s+e.value,0)/entries.length}
 function setStatus(message,type=""){$("status").textContent=message;$("status").className="status"+(type?" "+type:"")}
@@ -137,7 +140,8 @@ function refreshSourceInfo(){
  $("sourceBelarusbank").textContent=sourceState.belarusbank?"Подключён · Орша · среднее покупки/продажи":"Недоступен в браузере или ответ не распознан";
  $("sourceBTC").textContent=sourceState.btc?"Котировка доступна":"Котировка недоступна";
  $("sourceGold").textContent=sourceState.gold?"Котировка доступна":"Котировка недоступна";
- const ok=Number(sourceState.primary)+Number(Object.keys(sourceState.secondary).length>0)+Number(sourceState.btc)+Number(sourceState.gold)+Number(sourceState.belarusbank);
+ $("sourceOil").textContent=sourceState.oil?"Brent · USD за баррель":"Котировка недоступна";
+ const ok=Number(sourceState.primary)+Number(Object.keys(sourceState.secondary).length>0)+Number(sourceState.btc)+Number(sourceState.gold)+Number(sourceState.oil)+Number(sourceState.belarusbank);
  setLive(ok>=2?"Источники доступны":ok===1?"Часть источников доступна":"Нет соединения",ok>=2?"good":ok===0?"bad":"");
 }
 async function refreshAll(){
@@ -151,15 +155,16 @@ async function refreshAll(){
  Object.entries(sourceState.secondary).forEach(([code,item])=>addCandidate(candidates,code,item.value,"Frankfurter"));
  sourceState.belarusbank=b.status==="fulfilled";
  if(sourceState.belarusbank)addCandidate(candidates,"BYN",b.value,"Беларусбанк · Орша, средний наличный курс");
- const market=m.status==="fulfilled"?m.value:{btc:null,gold:null};
- sourceState.btc=Number.isFinite(market.btc);sourceState.gold=Number.isFinite(market.gold);
+ const market=m.status==="fulfilled"?m.value:{btc:null,gold:null,oil:null};
+ sourceState.btc=Number.isFinite(market.btc);sourceState.gold=Number.isFinite(market.gold);sourceState.oil=Number.isFinite(market.oil);
  if(market.btc)addCandidate(candidates,"BTC",1/market.btc,"CoinGecko");
  if(market.gold)addCandidate(candidates,"XAU",31.1034768/market.gold,"Gold-API · грамм на USD");
+ if(market.oil)addCandidate(candidates,"OIL",1/market.oil,"Croncopia · Brent, USD за баррель");
  const next={};
  for(const a of ASSETS){const entries=candidates[a.code]||[];if(entries.length)next[a.code]={value:average(entries),sources:entries}}
  next.USD={value:1,sources:candidates.USD||[{name:"USD base",value:1}]};
  if(next.USD)rates=next;
- if(p.status==="fulfilled")recordHistory();refreshSourceInfo();updateResults();updatePair();renderCharts();
+ recordHistory();refreshSourceInfo();updateResults();updatePair();renderCharts();
  const available=Object.keys(rates).length;
  if(p.status==="fulfilled"){
   const averaged=Object.values(rates).filter(r=>r.sources.length>1).length;
