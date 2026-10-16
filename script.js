@@ -1,147 +1,134 @@
-const API = {
-  fiat: "https://open.er-api.com/v6/latest/USD",
-  cross: code => "https://api.frankfurter.dev/v2/rate/usd/" + code.toLowerCase(),
-  bitcoin: "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd",
-  gold: "https://api.gold-api.com/price/XAU"
+"use strict";
+const ASSETS=[
+ {code:"USD",name:"Доллар США",icon:"🇺🇸",kind:"fiat",digits:2},
+ {code:"EUR",name:"Евро",icon:"🇪🇺",kind:"fiat",digits:2},
+ {code:"RUB",name:"Российский рубль",icon:"🇷🇺",kind:"fiat",digits:2},
+ {code:"BYN",name:"Белорусский рубль",icon:"🇧🇾",kind:"fiat",digits:2},
+ {code:"PLN",name:"Польский злотый",icon:"🇵🇱",kind:"fiat",digits:2},
+ {code:"BTC",name:"Bitcoin",icon:"₿",kind:"crypto",digits:8},
+ {code:"XAU",name:"Золото · тройская унция",icon:"🟡",kind:"metal",digits:4},
+ {code:"CNY",name:"Китайский юань",icon:"🇨🇳",kind:"fiat",digits:2}
+];
+const $=id=>document.getElementById(id);
+const API={
+ primary:"https://open.er-api.com/v6/latest/USD",
+ secondary:code=>"https://api.frankfurter.dev/v2/rate/USD/"+code,
+ bitcoin:"https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd",
+ gold:"https://api.gold-api.com/price/XAU"
 };
-const ASSETS = {
-  USD:{name:"Доллар США",icon:"🇺🇸",kind:"fiat",digits:2},
-  EUR:{name:"Евро",icon:"🇪🇺",kind:"fiat",digits:2},
-  RUB:{name:"Российский рубль",icon:"🇷🇺",kind:"fiat",digits:2},
-  BYN:{name:"Белорусский рубль",icon:"🇧🇾",kind:"fiat",digits:2},
-  PLN:{name:"Польский злотый",icon:"🇵🇱",kind:"fiat",digits:2},
-  BTC:{name:"Bitcoin",icon:"₿",kind:"crypto",digits:8},
-  XAU:{name:"Золото · тройская унция",icon:"🟡",kind:"metal",digits:4},
-  CNY:{name:"Китайский юань",icon:"🇨🇳",kind:"fiat",digits:2}
-};
-const $ = s => document.querySelector(s);
-const amountInput=$("#amount"), fromSelect=$("#fromCurrency"), toSelect=$("#toCurrency"), resultOutput=$("#result");
-const statusEl=$("#status"), refreshButton=$("#refreshButton"), swapButton=$("#swapButton"), copyButton=$("#copyButton");
-const rateText=$("#rateText"), rateMeta=$("#rateMeta"), checkBadge=$("#checkBadge");
-const numberFormat = new Intl.NumberFormat("ru-RU",{maximumFractionDigits:8});
-let unitsPerUSD = {USD:1};
-let sources = {primary:false, cross:{}, btc:false, gold:false};
-let lastUpdated = null, isLoading = false, requestId = 0, lastResult = null;
-const fiatCache = new Map();
-
-function setStatus(message,type=""){statusEl.textContent=message;statusEl.className="status"+(type?" "+type:"");}
-function fmt(value,digits=2){if(!Number.isFinite(value))return "—";return new Intl.NumberFormat("ru-RU",{maximumFractionDigits:digits,minimumFractionDigits:0}).format(value);}
-function money(value,code){const digits=ASSETS[code]?.digits??2;return fmt(value,digits)+" "+code;}
-function parseAmount(){const raw=amountInput.value.trim().replace(/\s/g,"").replace(",",".");if(!raw)return null;const n=Number(raw);return Number.isFinite(n)&&n>=0?n:null;}
-function fillAssetSelect(select,initial){select.replaceChildren(...Object.keys(ASSETS).map(code=>{const o=document.createElement("option");o.value=code;o.textContent=code;return o;}));select.value=initial;}
-function updateAssetLabels(){
-  const from=fromSelect.value,to=toSelect.value;
-  $("#fromName").textContent=ASSETS[from].name;$("#toName").textContent=ASSETS[to].name;
-  $("#fromIcon").textContent=ASSETS[from].icon;$("#toIcon").textContent=ASSETS[to].icon;
-  document.querySelectorAll("[data-amount]").forEach(b=>b.classList.toggle("selected",Number(b.dataset.amount)===Number(amountInput.value)));
+let rates={USD:{value:1,sources:[{name:"USD base",value:1}]}},sourceState={primary:false,secondary:{},btc:false,gold:false},lastUpdated=null,activeCode="USD",loading=false,toastTimer=null,refreshId=0;
+const list=$("currencyList");
+function fmt(n,d=2){if(!Number.isFinite(n))return"—";return new Intl.NumberFormat("ru-RU",{maximumFractionDigits:d,minimumFractionDigits:0}).format(n)}
+function parseValue(v){if(typeof v!=="string")return null;const s=v.trim().replace(/\s/g,"").replace(",",".");if(!s)return null;const n=Number(s);return Number.isFinite(n)&&n>=0?n:null}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function renderRows(){
+ list.innerHTML=ASSETS.map((a,i)=>`<div class="currency-row ${a.code===activeCode?"active":""}" data-row="${a.code}" style="--i:${i}">
+ <div class="currency-info"><div class="currency-icon" aria-hidden="true">${a.icon}</div><div class="currency-labels"><div class="currency-symbol">${a.code}</div><div class="currency-name">${a.name}</div></div></div>
+ <div class="amount-wrap"><input class="amount-input" id="amount-${a.code}" data-code="${a.code}" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" aria-label="Сумма в ${a.code}" placeholder="—" value="${a.code==="USD"?"1":""}"><div class="row-sub" id="sub-${a.code}">${a.code==="USD"?"Базовая валюта":"Курс загружается"}</div></div>
+ </div>`).join("");
+ list.querySelectorAll(".amount-input").forEach(input=>{
+  input.addEventListener("focus",()=>activate(input.dataset.code));
+  input.addEventListener("click",()=>activate(input.dataset.code));
+  input.addEventListener("input",()=>{activeCode=input.dataset.code;list.querySelectorAll(".currency-row").forEach(r=>r.classList.toggle("active",r.dataset.row===activeCode));convertFrom(input.dataset.code,input.value)});
+ });
 }
-async function fetchJSON(url,timeout=9000){
-  const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),timeout);
-  try{const response=await fetch(url,{signal:controller.signal,cache:"no-store"});if(!response.ok)throw new Error("HTTP "+response.status);return await response.json();}
-  finally{clearTimeout(timer);}
+function activate(code){activeCode=code;list.querySelectorAll(".currency-row").forEach(r=>r.classList.toggle("active",r.dataset.row===code));updatePair()}
+function convertFrom(code,raw){
+ const amount=parseValue(raw);
+ for(const a of ASSETS){const input=$("amount-"+a.code);if(a.code!==code)input.value="";}
+ if(amount===null){updateSubs();updatePair();return}
+ const base=rates[code]?.value;
+ if(!Number.isFinite(base)||base<=0){updateSubs();updatePair();return}
+ for(const a of ASSETS){if(a.code===code)continue;const target=rates[a.code]?.value;const input=$("amount-"+a.code);input.value=Number.isFinite(target)&&target>0?fmt(amount*target/base,a.digits):"";}
+ updateSubs();updatePair();
 }
-async function fetchFiat(){
-  const data=await fetchJSON(API.fiat);
-  if(data.result!=="success"||!data.rates||typeof data.rates.USD!=="number")throw new Error("Основной источник валют недоступен");
-  const rates={USD:1};for(const code of ["EUR","RUB","BYN","PLN","CNY"]){const r=data.rates[code];if(Number.isFinite(r)&&r>0)rates[code]=r;}
-  fiatCache.clear();Object.entries(rates).forEach(([code,rate])=>fiatCache.set(code,rate));
-  return {rates,updated:data.time_last_update_utc||null};
+function updateSubs(){
+ for(const a of ASSETS){const el=$("sub-"+a.code),entry=rates[a.code];if(!entry){el.textContent="Курс недоступен";continue}const n=entry.sources?.length||0;el.textContent=a.code===activeCode?"Исходная сумма":n>1?n+" источника · среднее":n===1?"1 источник":"Базовая валюта"}
 }
-async function fetchCrossChecks(){
-  const codes=["EUR","PLN","CNY"];
-  const results=await Promise.allSettled(codes.map(async code=>{
-    const data=await fetchJSON(API.cross(code),6500);
-    const rate=Number(data.rate);
-    if(!Number.isFinite(rate)||rate<=0)throw new Error("invalid rate");
-    return {code,rate,date:data.date||null};
-  }));
-  const cross={};results.forEach((r,i)=>{if(r.status==="fulfilled")cross[r.value.code]=r.value;});
-  return cross;
+function updatePair(){
+ const base=rates[activeCode]?.value,sourceList=rates[activeCode]?.sources||[];
+ $("pairTitle").textContent="Курс · "+activeCode;
+ if(!Number.isFinite(base)||base<=0){$("pairRate").textContent="Нет доступного курса";$("pairMeta").textContent="Попробуй обновить данные";$("checkPill").className="check-pill bad";$("checkPill").textContent="Нет данных";return}
+ const count=sourceList.length;
+ $("pairRate").textContent="1 "+activeCode+" = "+ASSETS.filter(a=>a.code!=="USD"&&rates[a.code]).map(a=>fmt(rates[a.code].value/base,a.digits)+" "+a.code).join(" · ");
+ $("pairMeta").textContent=count>1?"Среднее арифметическое "+count+" доступных значений для "+activeCode:count===1?"Доступен один источник для "+activeCode:"Базовый курс";
+ $("checkPill").className="check-pill "+(count>1?"good":"");$("checkPill").textContent=count>1?"Усреднено":"Источников: "+count;
+ $("sourceCount").textContent="· "+count+" для "+activeCode;
 }
-async function fetchMarket(){
-  const results=await Promise.allSettled([
-    fetchJSON(API.bitcoin,8500).then(d=>{const price=Number(d?.bitcoin?.usd);if(!Number.isFinite(price)||price<=0)throw new Error("BTC unavailable");return price;}),
-    fetchJSON(API.gold,8500).then(d=>{const price=Number(d?.price);if(!Number.isFinite(price)||price<=0)throw new Error("gold unavailable");return price;})
-  ]);
-  return {btc:results[0].status==="fulfilled"?results[0].value:null,gold:results[1].status==="fulfilled"?results[1].value:null};
+async function getJSON(url,timeout=9000){
+ const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),timeout);
+ try{const res=await fetch(url,{signal:ctrl.signal,cache:"no-store"});if(!res.ok)throw Error("HTTP "+res.status);return await res.json()}finally{clearTimeout(timer)}
 }
-function computeUnits(fiat,market){
-  const units={...fiat.rates};
-  if(market.btc)units.BTC=1/market.btc;
-  if(market.gold)units.XAU=1/market.gold;
-  units.USD=1;return units;
+function addCandidate(candidates,code,value,source){if(!Number.isFinite(value)||value<=0)return;(candidates[code]??=[]).push({name:source,value})}
+async function getPrimary(){
+ const d=await getJSON(API.primary);
+ if(d.result!=="success"||!d.rates||!Number.isFinite(Number(d.rates.USD)))throw Error("Primary feed invalid");
+ const out={};for(const a of ASSETS.filter(a=>a.kind==="fiat")){const value=Number(d.rates[a.code]);if(Number.isFinite(value)&&value>0)out[a.code]=value}
+ if(!out.USD)out.USD=1;
+ return {rates:out,updated:d.time_last_update_utc||null};
 }
-function checkSourceHealth(){
-  const liveCount=Number(sources.primary)+Number(sources.btc)+Number(sources.gold);
-  $("#liveDot").className=liveCount>=2?"good":liveCount===0?"bad":"";
-  $("#liveLabel").textContent=liveCount===3?"Источники доступны":liveCount?"Часть источников доступна":"Нет соединения";
-  $("#primaryStatus").textContent=sources.primary?"Подключён · фиатные курсы":"Нет данных · фиатные курсы";
-  $("#secondaryStatus").textContent=Object.keys(sources.cross).length?"Сверка доступна: "+Object.keys(sources.cross).join(", "):"Независимый источник временно недоступен";
-  $("#marketStatus").textContent=[sources.btc?"BTC OK":"BTC недоступен",sources.gold?"золото OK":"золото недоступно"].join(" · ");
+async function getSecondary(){
+ const codes=["EUR","PLN","CNY","RUB"];
+ const results=await Promise.allSettled(codes.map(async code=>{
+  const d=await getJSON(API.secondary(code),7000);const value=Number(d.rate);
+  if(!Number.isFinite(value)||value<=0)throw Error("Invalid quote");
+  return {code,value,date:d.date||null};
+ }));
+ const out={};results.forEach(r=>{if(r.status==="fulfilled")out[r.value.code]=r.value});return out;
 }
-function render(){
-  updateAssetLabels();
-  const amount=parseAmount(),from=fromSelect.value,to=toSelect.value;
-  if(amount===null){resultOutput.textContent="Введите сумму";rateText.textContent="—";lastResult=null;return;}
-  if(!unitsPerUSD[from]||!unitsPerUSD[to]){resultOutput.textContent="Нет данных";rateText.textContent="Курс недоступен";lastResult=null;return;}
-  const rate=unitsPerUSD[to]/unitsPerUSD[from],converted=amount*rate;
-  resultOutput.textContent=fmt(converted,ASSETS[to].digits);
-  rateText.textContent="1 "+from+" = "+fmt(rate,Math.min(8,ASSETS[to].digits+2))+" "+to;
-  const crossFrom=sources.cross[from],crossTo=sources.cross[to];
-  let delta=null;
-  if(from==="USD"&&crossTo&&unitsPerUSD[to])delta=Math.abs(unitsPerUSD[to]-crossTo.rate)/crossTo.rate*100;
-  else if(to==="USD"&&crossFrom&&unitsPerUSD[from])delta=Math.abs(unitsPerUSD[from]-crossFrom.rate)/crossFrom.rate*100;
-  else if(crossFrom&&crossTo){
-    const primary=unitsPerUSD[to]/unitsPerUSD[from],secondary=crossTo.rate/crossFrom.rate;
-    delta=Math.abs(primary-secondary)/secondary*100;
-  }
-  if(delta!==null){
-    checkBadge.className="rate-check "+(delta<2?"good":"bad");
-    checkBadge.querySelector("span").textContent=delta<2?"Сверено":"Есть разница";
-    rateMeta.textContent="Разница источников: "+fmt(delta,2)+"%";
-  }else{
-    checkBadge.className="rate-check";
-    checkBadge.querySelector("span").textContent="Справочно";
-    rateMeta.textContent=lastUpdated?"Основной курс обновлён: "+new Intl.DateTimeFormat("ru-RU",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit",timeZone:"UTC"}).format(new Date(lastUpdated))+" UTC":"Второй источник для этой пары недоступен";
-  }
-  lastResult={amount,from,to,converted,rate};
+async function getMarket(){
+ const results=await Promise.allSettled([
+  getJSON(API.bitcoin,8500).then(d=>{const n=Number(d?.bitcoin?.usd);if(!Number.isFinite(n)||n<=0)throw Error("BTC quote invalid");return n}),
+  getJSON(API.gold,8500).then(d=>{const n=Number(d?.price);if(!Number.isFinite(n)||n<=0)throw Error("Gold quote invalid");return n})
+ ]);
+ return {btc:results[0].status==="fulfilled"?results[0].value:null,gold:results[1].status==="fulfilled"?results[1].value:null};
+}
+function average(entries){return entries.reduce((s,e)=>s+e.value,0)/entries.length}
+function setStatus(message,type=""){$("status").textContent=message;$("status").className="status"+(type?" "+type:"")}
+function setLive(label,state=""){$("liveLabel").textContent=label;$("liveDot").className="live-dot "+state}
+function refreshSourceInfo(){
+ $("sourcePrimary").textContent=sourceState.primary?"Подключён · фиатные курсы":"Нет данных";
+ const checked=Object.keys(sourceState.secondary);
+ $("sourceSecondary").textContent=checked.length?"Доступно: "+checked.join(", "):"Второй источник не вернул данные";
+ $("sourceBTC").textContent=sourceState.btc?"Котировка доступна":"Котировка недоступна";
+ $("sourceGold").textContent=sourceState.gold?"Котировка доступна":"Котировка недоступна";
+ const ok=Number(sourceState.primary)+Number(sourceState.btc)+Number(sourceState.gold);
+ setLive(ok>=2?"Источники доступны":ok===1?"Часть источников доступна":"Нет соединения",ok>=2?"good":ok===0?"bad":"");
 }
 async function refreshAll(){
-  if(isLoading)return;isLoading=true;const myRequest=++requestId;
-  refreshButton.disabled=true;setStatus("Проверяем основной и независимые источники…");
-  try{
-    const [fiatResult,crossResult,marketResult]=await Promise.allSettled([fetchFiat(),fetchCrossChecks(),fetchMarket()]);
-    if(myRequest!==requestId)return;
-    if(fiatResult.status==="fulfilled"){
-      sources.primary=true;const fiat=fiatResult.value;lastUpdated=fiat.updated;
-      const market=marketResult.status==="fulfilled"?marketResult.value:{btc:null,gold:null};
-      sources.btc=Boolean(market.btc);sources.gold=Boolean(market.gold);
-      sources.cross=crossResult.status==="fulfilled"?crossResult.value:{};
-      unitsPerUSD=computeUnits(fiat,market);
-      setStatus("Курсы загружены. Сверка выполняется для валют, поддерживаемых обоими источниками.","success");
-    }else{
-      sources.primary=false;
-      if(!Object.keys(unitsPerUSD).some(code=>code!=="USD"))unitsPerUSD={USD:1};
-      setStatus("Не удалось получить основной курс. Попробуй обновить позже.","error");
-    }
-    if(crossResult.status==="rejected")sources.cross={};
-    if(marketResult.status==="rejected"){sources.btc=false;sources.gold=false;}
-    checkSourceHealth();render();
-  }catch(error){setStatus("Ошибка загрузки данных. Проверь подключение и попробуй снова.","error");}
-  finally{isLoading=false;refreshButton.disabled=false;}
+ if(loading)return;loading=true;const id=++refreshId;$("refreshButton").disabled=true;document.body.classList.add("loading");setStatus("Получаем курсы из нескольких источников…");setLive("Проверяем…");
+ const [p,s,m]=await Promise.allSettled([getPrimary(),getSecondary(),getMarket()]);
+ if(id!==refreshId)return;
+ const candidates={USD:[{name:"USD base",value:1}]};
+ sourceState.primary=p.status==="fulfilled";
+ if(p.status==="fulfilled"){Object.entries(p.value.rates).forEach(([code,value])=>addCandidate(candidates,code,value,"ExchangeRate-API"));lastUpdated=p.value.updated}
+ sourceState.secondary=s.status==="fulfilled"?s.value:{};
+ Object.entries(sourceState.secondary).forEach(([code,item])=>addCandidate(candidates,code,item.value,"Frankfurter"));
+ const market=m.status==="fulfilled"?m.value:{btc:null,gold:null};
+ sourceState.btc=Number.isFinite(market.btc);sourceState.gold=Number.isFinite(market.gold);
+ if(market.btc)addCandidate(candidates,"BTC",1/market.btc,"CoinGecko");
+ if(market.gold)addCandidate(candidates,"XAU",1/market.gold,"Gold-API");
+ const next={};
+ for(const a of ASSETS){const entries=candidates[a.code]||[];if(entries.length)next[a.code]={value:average(entries),sources:entries}}
+ next.USD={value:1,sources:candidates.USD||[{name:"USD base",value:1}]};
+ if(next.USD)rates=next;
+ refreshSourceInfo();updateSubs();updatePair();
+ const available=Object.keys(rates).length;
+ if(p.status==="fulfilled"){
+  const averaged=Object.values(rates).filter(r=>r.sources.length>1).length;
+  const when=lastUpdated?" · обновление источника "+new Date(lastUpdated).toLocaleString("ru-RU",{timeZone:"UTC",hour:"2-digit",minute:"2-digit",day:"2-digit",month:"short"})+" UTC":"";
+  $("updatedLabel").textContent="Данные обновлены"+when;
+  setStatus("Курсы загружены: "+available+" активов. Для "+averaged+" активов усреднены несколько источников.","success");
+ }else{
+  $("updatedLabel").textContent="Нет свежего обновления";
+  setStatus("Основной источник недоступен. Доступные активы могут быть ограничены; попробуй обновить ещё раз.","error");
+ }
+ const activeInput=$("amount-"+activeCode);if(activeInput&&activeInput.value!=="")convertFrom(activeCode,activeInput.value);
+ loading=false;$("refreshButton").disabled=false;document.body.classList.remove("loading");
 }
-amountInput.addEventListener("input",render);
-fromSelect.addEventListener("change",render);
-toSelect.addEventListener("change",render);
-swapButton.addEventListener("click",()=>{const from=fromSelect.value;fromSelect.value=toSelect.value;toSelect.value=from;render();});
-refreshButton.addEventListener("click",refreshAll);
-document.querySelectorAll("[data-amount]").forEach(button=>button.addEventListener("click",()=>{amountInput.value=button.dataset.amount;render();}));
-copyButton.addEventListener("click",async()=>{
-  if(!lastResult){setStatus("Нет результата для копирования.","error");return;}
-  const text=money(lastResult.converted,lastResult.to);
-  try{await navigator.clipboard.writeText(text);copyButton.querySelector("span").textContent="Скопировано";setStatus("Результат скопирован: "+text,"success");setTimeout(()=>{copyButton.querySelector("span").textContent="Копировать";},1400);}
-  catch{setStatus("Не удалось открыть буфер обмена. Результат: "+text,"error");}
-});
-$("#sourcesToggle").addEventListener("click",()=>{const panel=$("#sourcesPanel"),button=$("#sourcesToggle"),open=button.getAttribute("aria-expanded")!=="true";button.setAttribute("aria-expanded",String(open));panel.hidden=!open;$("#sourcesChevron").textContent=open?"−":"＋";});
-$("#year").textContent=new Date().getFullYear();
-fillAssetSelect(fromSelect,"USD");fillAssetSelect(toSelect,"EUR");render();refreshAll();
+function showToast(message){const t=$("toast");t.textContent=message;t.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),1900)}
+$("refreshButton").addEventListener("click",refreshAll);
+$("resetButton").addEventListener("click",()=>{ASSETS.forEach(a=>$("amount-"+a.code).value="");activeCode="USD";$("amount-USD").value="1";activate("USD");convertFrom("USD","1");showToast("Суммы сброшены")});
+$("sourceToggle").addEventListener("click",()=>{const open=$("sourceToggle").getAttribute("aria-expanded")!=="true";$("sourceToggle").setAttribute("aria-expanded",String(open));$("sourcePanel").hidden=!open;$("sourceArrow").textContent=open?"−":"＋"});
+$("year").textContent=new Date().getFullYear();$("assetCount").textContent=ASSETS.length+" активов";
+renderRows();convertFrom("USD","1");refreshAll();
