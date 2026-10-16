@@ -21,43 +21,46 @@ let rates={USD:{value:1,sources:[{name:"USD base",value:1}]}},sourceState={prima
 const THEME_KEY="gpd-cash-theme";
 const THEME_MODES=["auto","light","dark"];
 const THEME_GLYPHS={auto:"◐",light:"☼",dark:"☾"};
-function applyTheme(mode,announce=false){
+function applyTheme(mode,save=true){
  if(!THEME_MODES.includes(mode))mode="auto";
  document.documentElement.dataset.theme=mode;
- document.documentElement.style.colorScheme=mode==="auto"?"light dark":mode;
- try{localStorage.setItem(THEME_KEY,mode)}catch(_){}
- const b=$("themeButton"),names={auto:"Авто",light:"Светлая",dark:"Тёмная"};
- if(b){b.textContent=THEME_GLYPHS[mode];b.title="Тема: "+names[mode]+" · нажми, чтобы сменить";b.setAttribute("aria-label","Тема: "+names[mode])}
+ if(save)try{localStorage.setItem(THEME_KEY,mode)}catch(_){}
+ document.querySelectorAll("[data-theme-choice]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.themeChoice===mode)));
  const meta=document.querySelector('meta[name="theme-color"]');
- if(meta)meta.content=mode==="light"?"#e9eee8":mode==="dark"?"#090c0a":(matchMedia("(prefers-color-scheme: dark)").matches?"#090c0a":"#e9eee8");
- if(announce)showToast("Тема: "+names[mode]);
+ if(meta)meta.content=mode==="dark"?"#171816":"#eeefec";
 }
-function cycleTheme(){let current="auto";try{current=localStorage.getItem(THEME_KEY)||"auto"}catch(_){}applyTheme(THEME_MODES[(THEME_MODES.indexOf(current)+1)%THEME_MODES.length],true)}
+function cycleTheme(){let mode="auto";try{mode=localStorage.getItem(THEME_KEY)||"auto"}catch(_){}applyTheme(THEME_MODES[(THEME_MODES.indexOf(mode)+1)%THEME_MODES.length],true)}
 const list=$("currencyList");
 function fmt(n,d=2){if(!Number.isFinite(n))return"—";return new Intl.NumberFormat("ru-RU",{maximumFractionDigits:d,minimumFractionDigits:0}).format(n)}
 function parseValue(v){if(typeof v!=="string")return null;const s=v.trim().replace(/,/g,".").replace(/(?:BYN|USD|EUR|RUB|PLN|BTC|XAU|CNY|zł|₿|[$€₽¥])/gi,"").replace(/\s/g,"");if(!s)return null;const n=Number(s);return Number.isFinite(n)&&n>=0?n:null}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function renderPicker(){
+ $("currencyPicker").innerHTML=ASSETS.map(a=>'<button type="button" class="currency-chip" data-code="'+a.code+'" aria-pressed="'+(a.code===activeCode)+'"><span class="chip-icon">'+a.icon+'</span>'+a.code+'</button>').join("");
+ $("currencyPicker").querySelectorAll("[data-code]").forEach(b=>b.addEventListener("click",()=>activate(b.dataset.code)));
+}
 function renderRows(){
- list.innerHTML=ASSETS.map((a,i)=>`<div class="currency-row ${a.code===activeCode?"active":""}" data-row="${a.code}" style="--i:${i}">
- <div class="currency-info"><div class="currency-icon" aria-hidden="true">${a.icon}</div><div class="currency-labels"><div class="currency-symbol">${a.code}</div><div class="currency-name">${a.name}</div></div></div>
- <div class="amount-wrap"><input class="amount-input" id="amount-${a.code}" data-code="${a.code}" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" aria-label="Сумма в ${a.code}" placeholder="—" value="${a.code==="USD"?"1":""}"><div class="row-sub" id="sub-${a.code}">${a.code==="USD"?"Базовая валюта":"Курс загружается"}</div></div>
- </div>`).join("");
- list.querySelectorAll(".amount-input").forEach(input=>{
-  input.addEventListener("focus",()=>activate(input.dataset.code));
-  input.addEventListener("click",()=>activate(input.dataset.code));
-  input.addEventListener("input",()=>{activeCode=input.dataset.code;list.querySelectorAll(".currency-row").forEach(r=>r.classList.toggle("active",r.dataset.row===activeCode));convertFrom(input.dataset.code,input.value)});
- });
+ list.innerHTML=ASSETS.map((a,i)=>'<div class="currency-row '+(a.code===activeCode?"active":"")+'" data-row="'+a.code+'" style="--i:'+i+'"><div class="currency-info"><div class="currency-icon">'+a.icon+'</div><div><div class="currency-symbol">'+a.code+'</div><div class="currency-name">'+a.name+'</div></div></div><div class="result-amount" id="result-'+a.code+'">—<span class="result-unit">'+(a.code==="XAU"?"г золота":a.code)+'</span></div><button class="copy-button" type="button" data-copy="'+a.code+'" aria-label="Скопировать сумму в '+a.code+'"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg></button></div>').join("");
+ list.querySelectorAll("[data-copy]").forEach(b=>b.addEventListener("click",()=>{const code=b.dataset.copy,n=converted(code);if(n===null){showToast("Курс пока недоступен");return}const value=fmt(n,ASSETS.find(a=>a.code===code).digits);if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(value).then(()=>showToast("Скопировано: "+value+" "+code)).catch(()=>showToast(value+" "+code));else showToast(value+" "+code)}));
 }
-function activate(code){activeCode=code;list.querySelectorAll(".currency-row").forEach(r=>r.classList.toggle("active",r.dataset.row===code));updatePair()}
-function convertFrom(code,raw){
- const amount=parseValue(raw);
- for(const a of ASSETS){const input=$("amount-"+a.code);if(a.code!==code)input.value="";}
- if(amount===null){updateSubs();updatePair();return}
- const base=rates[code]?.value;
- if(!Number.isFinite(base)||base<=0){updateSubs();updatePair();return}
- for(const a of ASSETS){if(a.code===code)continue;const target=rates[a.code]?.value;const input=$("amount-"+a.code);input.value=Number.isFinite(target)&&target>0?fmt(amount*target/base,a.digits):"";}
- updateSubs();updatePair();
+function converted(code){
+ const raw=$("sourceAmount").value.trim().replace(/\s/g,"").replace(",",".");
+ const amount=raw===""?null:Number(raw),base=rates[activeCode]?.value,target=rates[code]?.value;
+ if(amount===null||!Number.isFinite(amount)||amount<0||!(base>0)||!(target>0))return null;
+ return amount*target/base;
 }
+function updateResults(){
+ const raw=$("sourceAmount").value.trim().replace(/\s/g,"").replace(",",".");
+ const amount=raw===""||!Number.isFinite(Number(raw))||Number(raw)<0?null:Number(raw);
+ $("resultsCaption").textContent="из "+(amount===null?"—":fmt(amount,8))+" "+activeCode;
+ for(const a of ASSETS){const el=$("result-"+a.code);if(!el)continue;const n=converted(a.code);el.innerHTML=(n===null?"—":fmt(n,a.digits))+'<span class="result-unit">'+(a.code==="XAU"?"г золота":a.code)+'</span>';list.querySelector('[data-row="'+a.code+'"]').classList.toggle("active",a.code===activeCode)}
+}
+function activate(code){
+ activeCode=code;
+ renderPicker();
+ $("selectedCurrencyLabel").textContent=code+" · "+ASSETS.find(a=>a.code===code).name;
+ updateResults();updatePair();
+}
+function convertFrom(code,raw){activeCode=code;updateResults();updatePair()}
 function updateSubs(){
  for(const a of ASSETS){const el=$("sub-"+a.code),entry=rates[a.code];if(!entry){el.textContent="Курс недоступен";continue}const n=entry.sources?.length||0;el.textContent=a.code===activeCode?"Исходная сумма":n>1?n+" источника · среднее":n===1?"1 источник":"Базовая валюта"}
 }
@@ -158,15 +161,17 @@ async function refreshAll(){
   $("updatedLabel").textContent="Нет свежего обновления";
   setStatus("Основной источник недоступен. Доступные активы могут быть ограничены; попробуй обновить ещё раз.","error");
  }
- const activeInput=$("amount-"+activeCode);if(activeInput&&activeInput.value!=="")convertFrom(activeCode,activeInput.value);
+ updateResults();
  loading=false;$("refreshButton").disabled=false;document.body.classList.remove("loading");
 }
 function showToast(message){const t=$("toast");t.textContent=message;t.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),1900)}
-$("themeButton").addEventListener("click",cycleTheme);
-try{applyTheme(localStorage.getItem(THEME_KEY)||"auto")}catch(_){applyTheme("auto")}
-matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",()=>{let mode="auto";try{mode=localStorage.getItem(THEME_KEY)||"auto"}catch(_){}if(mode==="auto")applyTheme("auto")});
+document.querySelectorAll("[data-theme-choice]").forEach(b=>b.addEventListener("click",()=>applyTheme(b.dataset.themeChoice)));
+try{applyTheme(localStorage.getItem(THEME_KEY)||"auto",false)}catch(_){applyTheme("auto",false)}
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",()=>{let mode="auto";try{mode=localStorage.getItem(THEME_KEY)||"auto"}catch(_){}if(mode==="auto")applyTheme("auto",false)});
+$("sourceAmount").addEventListener("input",updateResults);
 $("refreshButton").addEventListener("click",refreshAll);
-$("resetButton").addEventListener("click",()=>{ASSETS.forEach(a=>$("amount-"+a.code).value="");activeCode="USD";$("amount-USD").value="1";activate("USD");convertFrom("USD","1");showToast("Суммы сброшены")});
+$("resetButton").addEventListener("click",()=>{$("sourceAmount").value="1";activate("USD");showToast("Сброшено к 1 USD")});
 $("sourceToggle").addEventListener("click",()=>{const open=$("sourceToggle").getAttribute("aria-expanded")!=="true";$("sourceToggle").setAttribute("aria-expanded",String(open));$("sourcePanel").hidden=!open;$("sourceArrow").textContent=open?"−":"＋"});
 $("year").textContent=new Date().getFullYear();$("assetCount").textContent=ASSETS.length+" активов";
+renderPicker();renderRows();activate("USD");refreshAll();
 renderRows();convertFrom("USD","1");refreshAll();
