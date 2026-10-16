@@ -35,7 +35,7 @@ function applyTheme(mode,announce=false){
 function cycleTheme(){let current="auto";try{current=localStorage.getItem(THEME_KEY)||"auto"}catch(_){}applyTheme(THEME_MODES[(THEME_MODES.indexOf(current)+1)%THEME_MODES.length],true)}
 const list=$("currencyList");
 function fmt(n,d=2){if(!Number.isFinite(n))return"—";return new Intl.NumberFormat("ru-RU",{maximumFractionDigits:d,minimumFractionDigits:0}).format(n)}
-function parseValue(v){if(typeof v!=="string")return null;const s=v.trim().replace(/\s/g,"").replace(",",".");if(!s)return null;const n=Number(s);return Number.isFinite(n)&&n>=0?n:null}
+function parseValue(v){if(typeof v!=="string")return null;const s=v.trim().replace(/,/g,".").replace(/(?:BYN|USD|EUR|RUB|PLN|BTC|XAU|CNY|zł|₿|[$€₽¥])/gi,"").replace(/\s/g,"");if(!s)return null;const n=Number(s);return Number.isFinite(n)&&n>=0?n:null}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function renderRows(){
  list.innerHTML=ASSETS.map((a,i)=>`<div class="currency-row ${a.code===activeCode?"active":""}" data-row="${a.code}" style="--i:${i}">
@@ -63,10 +63,10 @@ function updateSubs(){
 }
 function updatePair(){
  const base=rates[activeCode]?.value,sourceList=rates[activeCode]?.sources||[];
- $("pairTitle").textContent="Курс · "+activeCode;
+ $("pairTitle").textContent=activeCode==="XAU"?"Курс · золото за грамм":"Курс · "+activeCode;
  if(!Number.isFinite(base)||base<=0){$("pairRate").textContent="Нет доступного курса";$("pairMeta").textContent="Попробуй обновить данные";$("checkPill").className="check-pill bad";$("checkPill").textContent="Нет данных";return}
  const count=sourceList.length;
- $("pairRate").textContent="1 "+activeCode+" = "+ASSETS.filter(a=>a.code!=="USD"&&rates[a.code]).map(a=>fmt(rates[a.code].value/base,a.digits)+" "+a.code).join(" · ");
+ $("pairRate").textContent=(activeCode==="XAU"?"1 г золота":"1 "+activeCode)+" = "+ASSETS.filter(a=>a.code!=="USD"&&rates[a.code]).map(a=>fmt(rates[a.code].value/base,a.digits)+" "+a.code).join(" · ");
  $("pairMeta").textContent=count>1?"Среднее арифметическое "+count+" доступных значений для "+activeCode:count===1?"Доступен один источник для "+activeCode:"Базовый курс";
  $("checkPill").className="check-pill "+(count>1?"good":"");$("checkPill").textContent=count>1?"Усреднено":"Источников: "+count;
  $("sourceCount").textContent="· "+count+" для "+activeCode;
