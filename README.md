@@ -4,7 +4,7 @@
 
 ### One input. Every rate. Clear sources.
 
-**USD · EUR · RUB · BYN · PLN · BTC · XAU · CNY**
+**USD · EUR · RUB · BYN · PLN · GBP · KZT · BTC · XAU · CNY**
 
 [**Открыть конвертер / Open app**](https://german-gpd.github.io/Cash-Converter/) · [GitHub](https://github.com/German-GPD/Cash-Converter) · [German / GPD](https://german-gpd.github.io/about-german/)
 
@@ -18,12 +18,12 @@ Cash Converter — минималистичный конвертер валют,
 
 ### Что умеет
 
-- Восемь активов: **USD, EUR, RUB, BYN, PLN, BTC, XAU, CNY**.
+- Десять активов: **USD, EUR, RUB, BYN, PLN, GBP, KZT, BTC, XAU, CNY**.
 - Ввод суммы в любую строку пересчитывает остальные активы.
 - Курсы из доступных источников усредняются, если источников больше одного.
 - Показывает, когда есть только один источник и сверка недоступна.
 - Авто-тема по настройке устройства, ручное переключение на светлую/тёмную тему и адаптация под экран.
-- Анимации появления, переключения исходной валюты и обновления данных.
+- Фоновые орбиты, пролетающие стеклянные частицы и световые следы; анимации учитывают системную настройку уменьшения движения.
 - Без фреймворков, сборки и ключей API.
 
 ### Источники
@@ -38,10 +38,10 @@ Cash Converter — минималистичный конвертер валют,
 
 ## 🇬🇧 About
 
-Cash Converter is a responsive currency, Bitcoin, and gold converter with Auto, light, and dark appearance modes and an Apple-inspired glass UI.
+Cash Converter converts ten assets — USD, EUR, RUB, BYN, PLN, GBP, KZT, BTC, XAU, and CNY — with Auto, light, and dark appearance modes and a refined glass UI.
 
 - Type an amount into **any asset row** to update all other rows instantly.
-- Averages available independent quotes for the same asset.
+- Averages available independent quotes for the same asset; GBP also has a Frankfurter cross-check.
 - Clearly reports when only one provider is available.
 - System theme by default, manual theme switching, animated ambient lighting, responsive layout, no build step.
 
