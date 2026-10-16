@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#eeefec">
-<meta name="description" content="Cash Converter — конвертер валют, Bitcoin и золота с усреднением доступных независимых курсов. Автор German / GPD.">
+<meta name="theme-color" content="#000000">
+<meta name="description" content="Cash Converter — OLED-конвертер валют, Bitcoin, золота и нефти с графиками. Автор German / GPD.">
 <title>Cash Converter — German / GPD</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='2' y='2' width='60' height='60' rx='12' fill='%23888'/%3E%3Cpath d='M17 24h30M40 17l7 7-7 7M47 40H17m7-7-7 7 7 7' stroke='white' stroke-width='4' fill='none' stroke-linecap='square'/%3E%3C/svg%3E">
 <style>
@@ -185,6 +185,45 @@ body:after{background:radial-gradient(ellipse at 50% -25%,color-mix(in srgb,var(
 }
 @media(prefers-reduced-motion:reduce){.chart-card,.chart-light,.market-live i,.ambient,.orbit{animation:none!important;transition:none!important}}
 
+
+/* OLED mode — true black, restrained neon green */
+:root{--bg:#000;--ink:#f2f5f0;--muted:#858d85;--panel:rgba(10,13,10,.94);--panel-solid:#090b09;--line:rgba(183,255,137,.14);--soft:rgba(255,255,255,.035);--shadow:0 20px 70px rgba(0,0,0,.72);--accent:#b5ff72;--accent-soft:rgba(181,255,114,.09);--good:#b5ff72;--bad:#ff7777;--radius:10px;color-scheme:dark}
+html[data-theme="dark"],html[data-theme="auto"]{--bg:#000;--ink:#f2f5f0;--muted:#858d85;--panel:rgba(10,13,10,.94);--panel-solid:#090b09;--line:rgba(183,255,137,.14);--soft:rgba(255,255,255,.035);--shadow:0 20px 70px rgba(0,0,0,.72);--accent:#b5ff72;--accent-soft:rgba(181,255,114,.09);--good:#b5ff72;--bad:#ff7777;color-scheme:dark}
+html[data-theme="light"]{--bg:#f6f8f3;--ink:#171d16;--muted:#6c7568;--panel:rgba(255,255,255,.94);--panel-solid:#fff;--line:rgba(34,75,24,.16);--soft:rgba(30,60,20,.04);--shadow:0 16px 48px rgba(16,32,12,.08);--accent:#4b9e24;--accent-soft:rgba(75,158,36,.09);--good:#337e24;--bad:#b43d3d;color-scheme:light}
+body:before{background-size:32px 32px;opacity:.12;background-image:linear-gradient(to right,color-mix(in srgb,var(--accent) 8%,transparent) 1px,transparent 1px),linear-gradient(to bottom,color-mix(in srgb,var(--accent) 8%,transparent) 1px,transparent 1px)}
+body:after{background:radial-gradient(ellipse at 50% -18%,color-mix(in srgb,var(--accent) 9%,transparent),transparent 62%)}
+.ambient{opacity:.06!important;filter:blur(120px)}.fx-layer{opacity:.09}.fx-orbit,.fx-particle,.fx-shard,.fx-streak{display:none}
+.glass{background:linear-gradient(145deg,color-mix(in srgb,var(--panel) 96%,var(--accent) 4%),var(--panel));border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.035);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
+.topbar{border-bottom-color:var(--line)}.brand-icon,.square-button,.currency-icon,.author-logo{border-radius:9px;border-color:var(--line);box-shadow:none}
+.brand-icon{color:var(--accent);background:var(--accent-soft)}.brand-title small{color:var(--accent);letter-spacing:2px}
+.hero h1{letter-spacing:-2.4px;font-weight:760}.eyebrow{letter-spacing:2.3px}.eyebrow-mark{background:var(--accent);box-shadow:0 0 10px color-mix(in srgb,var(--accent) 30%,transparent)}
+.converter-head h2,.market-heading h2{font-family:var(--font);font-weight:720;letter-spacing:-.8px}
+.theme-switch,.theme-choice,.badge,.check-pill,.market-live,.currency-chip,.copy-button{border-radius:8px}
+.theme-choice[aria-pressed="true"]{background:var(--accent-soft);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 38%,transparent);color:var(--accent)}
+.square-button:hover,.copy-button:hover{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.main-amount{font-family:var(--font);font-weight:700;letter-spacing:-1.2px}
+.currency-chip{border-color:var(--line);background:rgba(255,255,255,.015)}.currency-chip[aria-pressed="true"]{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 55%,var(--line));background:var(--accent-soft);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 15%,transparent)}
+.currency-row{border-radius:8px;min-height:73px}.currency-row:hover{transform:none;background:var(--soft)}.currency-row.active{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 30%,var(--line))}.currency-row.active .currency-icon{border-color:var(--accent);color:var(--accent)}
+.result-amount{font-size:clamp(24px,4vw,30px);letter-spacing:-.9px}.amount-major{font-weight:780}.amount-minor{font-size:.38em;opacity:.52}.currency-row.active .amount-minor{color:var(--muted);opacity:.62}
+.rate-panel{border-radius:12px}.market-section{border-top:1px solid var(--line);padding-top:28px;margin-top:44px}.market-heading h2{font-size:clamp(25px,4.5vw,33px)}
+.market-live{border-color:var(--line);color:var(--accent)}.market-live i{background:var(--accent);box-shadow:0 0 10px color-mix(in srgb,var(--accent) 45%,transparent)}
+.chart-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.chart-card{border-radius:10px;padding:17px 16px 14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.025);animation:chart-arrive .35s both}.chart-card:before{height:1px;background:linear-gradient(90deg,transparent,var(--chart-color),var(--accent),transparent);opacity:.85}
+.chart-card:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--accent) 45%,var(--line));box-shadow:0 12px 35px #000}
+.chart-asset-icon{border-radius:8px;background:color-mix(in srgb,var(--chart-color) 8%,var(--panel));border-color:color-mix(in srgb,var(--chart-color) 22%,var(--line))}
+.chart-code{letter-spacing:1px}.chart-light{background:var(--accent);box-shadow:0 0 10px var(--accent)}
+.chart-price{font-family:var(--font);font-weight:740;letter-spacing:-.8px;font-size:clamp(22px,3.7vw,29px)}.chart-price small{color:var(--muted)}
+.chart-spark{height:58px;margin-top:10px;padding:3px 0;overflow:visible;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.chart-spark .spark-grid{fill:none;stroke:var(--line);stroke-width:.7;stroke-dasharray:2 4}
+.chart-spark .spark-area{fill:var(--chart-color);fill-opacity:.16;stroke:none}
+.chart-spark .spark-line,.chart-spark .spark-single{fill:none;stroke:var(--chart-color);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.chart-spark .spark-single{stroke-width:2;stroke-dasharray:3 4;opacity:.95}
+.chart-spark circle{fill:var(--chart-color);stroke:var(--panel-solid);stroke-width:2}
+.chart-change{border-radius:5px;background:color-mix(in srgb,var(--chart-color) 10%,transparent);color:var(--chart-color)}
+.chart-change.neutral{color:var(--muted);background:var(--soft)}.chart-disclaimer{border-left:2px solid var(--accent);background:var(--soft);padding:11px 13px;border-radius:0 7px 7px 0}
+.footer{border-top-color:var(--line)}.footer-bottom{border-top-color:var(--line)}
+@media(max-width:520px){.chart-grid{grid-template-columns:1fr}.chart-card{padding:15px 14px 12px}.chart-price{font-size:26px}.chart-spark{height:52px}.result-amount{font-size:clamp(21px,5.4vw,26px)}}
+@media(prefers-reduced-motion:reduce){.chart-card,.chart-light,.market-live i,.ambient,.orbit{animation:none!important;transition:none!important}}
+
 </style>
 <script src="script.js" defer></script>
 </head>
@@ -209,11 +248,11 @@ body:after{background:radial-gradient(ellipse at 50% -25%,color-mix(in srgb,var(
 </section>
 <section class="rate-panel glass" aria-label="Курс и источники"><div><div class="rate-title" id="pairTitle">Курс выбранной пары</div><div class="rate-main" id="pairRate">Проверяем источники…</div><div class="rate-detail" id="pairMeta">Используем среднее доступных котировок</div></div><span id="checkPill" class="check-pill">Проверка</span>
 <button type="button" class="source-toggle" id="sourceToggle" aria-expanded="false"><span>Как рассчитан курс <b id="sourceCount">· источники</b></span><span id="sourceArrow">＋</span></button>
-<div class="source-panel" id="sourcePanel" hidden><div class="source-row"><strong>ExchangeRate-API</strong><span id="sourcePrimary">Основной источник валют</span></div><div class="source-row"><strong>Frankfurter</strong><span id="sourceSecondary">Независимая сверка доступных валют</span></div><div class="source-row"><strong>Беларусбанк</strong><span id="sourceBelarusbank">Проверяем наличные курсы в Орше</span></div><div class="source-row"><strong>CoinGecko</strong><span id="sourceBTC">Bitcoin</span></div><div class="source-row"><strong>Gold-API</strong><span id="sourceGold">Золото</span></div><p class="source-note">Если для актива есть несколько независимых значений, конвертер усредняет доступные курсы в единой базе USD. Если доступен только один источник, используется он, а интерфейс это показывает. Источники могут обновляться с задержкой; справочные значения могут отличаться от банковских и биржевых цен.</p></div>
+<div class="source-panel" id="sourcePanel" hidden><div class="source-row"><strong>ExchangeRate-API</strong><span id="sourcePrimary">Основной источник валют</span></div><div class="source-row"><strong>Frankfurter</strong><span id="sourceSecondary">Независимая сверка доступных валют</span></div><div class="source-row"><strong>Беларусбанк</strong><span id="sourceBelarusbank">Проверяем наличные курсы в Орше</span></div><div class="source-row"><strong>CoinGecko</strong><span id="sourceBTC">Bitcoin</span></div><div class="source-row"><strong>Gold-API</strong><span id="sourceGold">Золото</span></div><div class="source-row"><strong>Croncopia · Brent</strong><span id="sourceOil">Нефть за баррель</span></div><p class="source-note">Если для актива есть несколько независимых значений, конвертер усредняет доступные курсы в единой базе USD. Если доступен только один источник, используется он, а интерфейс это показывает. Источники могут обновляться с задержкой; справочные значения могут отличаться от банковских и биржевых цен.</p></div>
 </section>
 <div id="status" class="status" role="status" aria-live="polite">Подключаемся к источникам…</div>
 <div class="under-note"><svg viewBox="0 0 24 24"><path d="M12 3 21 20H3z"/><path d="M12 9v5m0 3h.01"/></svg><span>Bitcoin показан по рыночной цене. Золото — за 1 грамм. Курс Беларусбанка, если доступен, может отличаться от среднего рыночного значения.</span></div>
-<section class="market-section" aria-labelledby="marketHeading"><div class="market-heading"><div><div class="eyebrow"><span class="eyebrow-mark"></span> MARKET SIGNALS</div><h2 id="marketHeading">Динамика стоимости</h2><p>Цена одного актива в долларах США · мини-графики по сохранённым обновлениям</p></div><span class="market-live"><i></i> LIVE FEEL</span></div><div id="chartSummary" class="chart-summary">История собирается в этом браузере</div><div id="chartGrid" class="chart-grid" aria-live="polite"></div><p class="chart-disclaimer">Это история обновлений конвертера на этом устройстве, а не полный биржевой архив. Новые точки появляются при обновлении курсов; без нескольких точек тренд пока не рассчитывается.</p></section>
+<section class="market-section" aria-labelledby="marketHeading"><div class="market-heading"><div><div class="eyebrow"><span class="eyebrow-mark"></span> MARKET SIGNALS</div><h2 id="marketHeading">Динамика стоимости</h2><p>Цена в USD · графики показывают историю обновлений на этом устройстве</p></div><span class="market-live"><i></i> LIVE FEEL</span></div><div id="chartSummary" class="chart-summary">История собирается в этом браузере</div><div id="chartGrid" class="chart-grid" aria-live="polite"></div><p class="chart-disclaimer">Линии показывают реальные сохранённые снимки котировок на этом устройстве. Первая точка отображается сразу; динамика и процент изменения появляются после следующих обновлений. Нефть — Brent, цена за баррель.</p></section>
 </main>
 <footer class="footer shell"><div class="author"><a class="author-logo" href="https://github.com/German-GPD" target="_blank" rel="noopener noreferrer" aria-label="GitHub German GPD">G</a><div class="author-copy"><strong>Сделано German / GPD</strong><small>Independent project · crafted with care</small></div></div><nav class="footer-links" aria-label="Ссылки автора"><a href="https://german-gpd.github.io/about-german/" target="_blank" rel="noopener noreferrer">Мой сайт ↗</a><a href="https://github.com/German-GPD/Cash-Converter" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="https://t.me/redfox_g56" target="_blank" rel="noopener noreferrer">Telegram ↗</a></nav><div class="footer-bottom"><span>© <span id="year"></span> German / GPD</span><span>Built for clarity, not noise.</span></div></footer>
 <div class="toast" id="toast" role="status"></div>
