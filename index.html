@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#10130f">
+<meta name="theme-color" content="#eeefec">
 <meta name="description" content="Cash Converter — конвертер валют, Bitcoin и золота с усреднением доступных независимых курсов. Автор German / GPD.">
 <title>Cash Converter — German / GPD</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='2' y='2' width='60' height='60' rx='12' fill='%23888'/%3E%3Cpath d='M17 24h30M40 17l7 7-7 7M47 40H17m7-7-7 7 7 7' stroke='white' stroke-width='4' fill='none' stroke-linecap='square'/%3E%3C/svg%3E">
@@ -50,20 +50,51 @@ body:after{background:radial-gradient(ellipse at 12% 10%,color-mix(in srgb,var(-
 
 @media(max-width:520px){.shell{width:calc(100% - 24px)}.topbar{height:66px}.hero{padding:33px 0 19px}.hero h1{letter-spacing:-2px}.hero p{font-size:12px}.converter-head{padding:16px 14px 13px}.currency-list{padding:6px 7px 9px}.currency-row{grid-template-columns:minmax(0,1fr) minmax(105px,40%);gap:7px;padding:11px 7px;min-height:70px}.currency-icon{width:37px;height:37px;font-size:19px}.currency-info{gap:8px}.currency-symbol{font-size:12px}.currency-name{font-size:9px;max-width:145px}.amount-input{font-size:17px}.row-sub{font-size:8px}.list-footer{padding:11px 13px 13px}.rate-panel{padding:13px}.footer{grid-template-columns:1fr;gap:13px}.footer-links{justify-content:flex-start}.footer-bottom{grid-column:auto;flex-wrap:wrap}.live{max-width:120px;font-size:9px}.badge{font-size:9px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Neutral GPD glass system */
+:root{--bg:#eeefec;--ink:#20211f;--muted:#7b7e79;--panel:rgba(255,255,255,.56);--panel-solid:#f5f6f2;--line:rgba(39,42,37,.10);--soft:rgba(255,255,255,.42);--shadow:0 24px 80px rgba(37,40,34,.075);--accent:#656963;--accent-soft:rgba(95,101,92,.09);--good:#477a61;--bad:#a65b57}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171816;--ink:#f1f1ec;--muted:#a2a49d;--panel:rgba(41,43,39,.55);--panel-solid:#242620;--line:rgba(244,245,238,.105);--soft:rgba(255,255,255,.045);--shadow:0 24px 80px rgba(0,0,0,.23);--accent:#c8cbc3;--accent-soft:rgba(255,255,255,.07);--good:#9ac7a9;--bad:#e2a19a}}
+html[data-theme="dark"]{color-scheme:dark;--bg:#171816;--ink:#f1f1ec;--muted:#a2a49d;--panel:rgba(41,43,39,.55);--panel-solid:#242620;--line:rgba(244,245,238,.105);--soft:rgba(255,255,255,.045);--shadow:0 24px 80px rgba(0,0,0,.23);--accent:#c8cbc3;--accent-soft:rgba(255,255,255,.07);--good:#9ac7a9;--bad:#e2a19a}
+html[data-theme="light"]{color-scheme:light}
+.ambient{width:430px;height:430px;filter:blur(82px);opacity:.18;mix-blend-mode:normal}
+.ambient-a{top:-220px;left:-180px;background:radial-gradient(circle,rgba(255,255,255,.95),transparent 70%);animation:neutral-float-a 25s ease-in-out infinite alternate}
+.ambient-b{right:-250px;top:32vh;background:radial-gradient(circle,rgba(160,168,156,.65),transparent 70%);animation:neutral-float-b 32s ease-in-out infinite alternate}
+.ambient-c{left:25%;bottom:-300px;background:radial-gradient(circle,rgba(255,255,255,.72),transparent 70%);animation:neutral-float-c 29s ease-in-out infinite alternate}
+@keyframes neutral-float-a{to{transform:translate(15vw,18vh) scale(1.12)}}@keyframes neutral-float-b{to{transform:translate(-12vw,12vh) scale(.88)}}@keyframes neutral-float-c{to{transform:translate(8vw,-12vh) scale(1.15)}}
+.theme-switch{display:flex;gap:2px;padding:3px;border:1px solid var(--line);border-radius:11px;background:var(--panel);backdrop-filter:blur(24px)}
+.theme-choice{border:0;border-radius:8px;padding:7px 8px;background:transparent;color:var(--muted);font-size:10px;cursor:pointer}
+.theme-choice[aria-pressed="true"]{background:var(--soft);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.input-zone{padding:20px;border-bottom:1px solid var(--line);background:linear-gradient(120deg,var(--soft),transparent 75%)}
+.input-label,.chosen-currency{display:flex;justify-content:space-between;gap:10px;align-items:center;color:var(--muted);font-size:10px}
+.main-amount{width:100%;min-width:0;margin:9px 0 14px;padding:4px 0 10px;border:0;border-bottom:1px solid var(--line);outline:0;background:transparent;color:var(--ink);font-size:clamp(32px,7vw,44px);font-weight:650;letter-spacing:-1.8px;font-variant-numeric:tabular-nums}
+.main-amount:focus{border-bottom-color:var(--accent)}.main-amount::placeholder{color:var(--muted);opacity:.65}.chosen-currency strong{color:var(--ink);font-weight:600}
+.currency-picker{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.currency-chip{display:flex;align-items:center;gap:7px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:var(--soft);color:var(--muted);font-size:11px;cursor:pointer;transition:transform .18s,background .18s,color .18s}
+.currency-chip:hover{transform:translateY(-1px);color:var(--ink)}.currency-chip[aria-pressed="true"]{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 38%,var(--line));color:var(--ink);box-shadow:inset 0 1px 0 #ffffff40}.chip-icon{font-size:15px}
+.results-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:16px 20px 8px}.results-head strong{font-size:12px}.results-head span{font-size:10px;color:var(--muted)}
+.currency-row{grid-template-columns:minmax(0,1fr) minmax(100px,40%) auto;gap:10px;min-height:66px}.currency-row.active{background:var(--accent-soft);border-color:var(--line)}.currency-row.active:before{display:none}.currency-row.active .amount-input{color:var(--ink)}
+.result-amount{text-align:right;min-width:0;font-size:clamp(14px,2.7vw,18px);font-weight:650;letter-spacing:-.45px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.result-unit{display:block;margin-top:4px;color:var(--muted);font-size:9px;font-weight:450;letter-spacing:0}
+.copy-button{width:30px;height:30px;display:grid;place-items:center;border:1px solid transparent;border-radius:9px;background:transparent;color:var(--muted);cursor:pointer}.copy-button:hover{border-color:var(--line);background:var(--panel);color:var(--ink)}.copy-button svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.6}
+.glass{background:linear-gradient(135deg,color-mix(in srgb,var(--panel) 80%,white 20%),var(--panel));border-color:var(--line);box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.42);backdrop-filter:blur(32px) saturate(135%)}
+.eyebrow-mark{background:var(--accent);box-shadow:none}.currency-icon,.brand-icon,.square-button,.author-logo{box-shadow:inset 0 1px 0 #ffffff30}.currency-row.active:before{background:var(--accent);box-shadow:none}.theme-button{color:var(--ink)}
+@media(max-width:560px){.theme-choice{padding:7px 6px;font-size:9px}.top-actions{gap:6px}.live{max-width:72px;font-size:9px}.input-zone{padding:16px 14px}.currency-chip{padding:8px 9px}.results-head{padding:14px 14px 7px}.currency-list{padding:3px 6px 8px}.currency-row{grid-template-columns:minmax(0,1fr) minmax(76px,36%) 27px;gap:5px;padding:9px 5px;min-height:62px}.currency-icon{width:34px;height:34px;font-size:17px}.currency-info{gap:7px}.currency-name{font-size:9px;max-width:145px}.result-amount{font-size:14px}.copy-button{width:27px;height:27px}}
+@media(prefers-reduced-motion:reduce){.ambient{animation:none!important}}
+
 </style>
 <script src="script.js" defer></script>
 </head>
 <body>
-<div class="ambient ambient-a" aria-hidden="true"></div><div class="ambient ambient-b" aria-hidden="true"></div><div class="ambient ambient-c" aria-hidden="true"></div><div class="orbit orbit-a" aria-hidden="true"></div><div class="orbit orbit-b" aria-hidden="true"></div>
+<div class="ambient ambient-a" aria-hidden="true"></div><div class="ambient ambient-b" aria-hidden="true"></div><div class="ambient ambient-c" aria-hidden="true"></div>
 <header class="topbar shell">
 <a class="brand" href="./" aria-label="Cash Converter"><span class="brand-icon">↔</span><span class="brand-title">Cash Converter<small>BY GERMAN / GPD</small></span></a>
-<div class="top-actions"><span class="live"><i id="liveDot" class="live-dot"></i><span id="liveLabel">Подключение…</span></span><button class="square-button theme-button" id="themeButton" aria-label="Тема: авто" title="Тема: авто">◐</button><button class="square-button" id="refreshButton" aria-label="Обновить курсы" title="Обновить курсы"><svg viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.5 9a7 7 0 0 1 11.8-2L20 12M4 12l2.7 5a7 7 0 0 0 11.8-2"/></svg></button></div>
+<div class="top-actions"><span class="live"><i id="liveDot" class="live-dot"></i><span id="liveLabel">Подключение…</span></span><div class="theme-switch" role="group" aria-label="Выбор темы"><button class="theme-choice" type="button" data-theme-choice="auto" aria-pressed="true">Авто</button><button class="theme-choice" type="button" data-theme-choice="light" aria-pressed="false">Свет</button><button class="theme-choice" type="button" data-theme-choice="dark" aria-pressed="false">Тёмн.</button></div><button class="square-button" id="refreshButton" aria-label="Обновить курсы" title="Обновить курсы"><svg viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.5 9a7 7 0 0 1 11.8-2L20 12M4 12l2.7 5a7 7 0 0 0 11.8-2"/></svg></button></div>
 </header>
 <main class="shell">
-<section class="hero"><div class="eyebrow"><span class="eyebrow-mark"></span> SIMPLE MONEY TOOLS</div><h1>Все курсы.<br>Одна строка.</h1><p>Введи сумму в любой валюте — остальные пересчитаются сразу.<br>Твой ритм. Твои курсы. Авто-тема или ручной режим — на выбор.</p></section>
+<section class="hero"><div class="eyebrow"><span class="eyebrow-mark"></span> MONEY, WITHOUT THE NOISE</div><h1>Одна сумма.<br>Все валюты.</h1><p>Введи число, выбери исходную валюту кнопкой — готовый список пересчитается мгновенно.</p></section>
 <section class="converter glass" aria-label="Конвертер валют и активов">
-<div class="converter-head"><div><h2>Конвертация</h2><p>Нажми на любую сумму, чтобы сделать её исходной</p></div><span class="badge"><svg viewBox="0 0 24 24"><path d="m12 3 8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="m8.5 12 2.2 2.2 4.8-5"/></svg><span id="assetCount">8 активов</span></span></div>
-<div id="currencyList" class="currency-list" aria-label="Список валют"></div>
+<div class="converter-head"><div><h2>Конвертер</h2><p>Сумма и исходная валюта — всё в одном месте</p></div><span class="badge"><span id="assetCount">8 активов</span></span></div>
+<div class="input-zone"><div class="input-label"><span>СУММА</span><span>Мгновенный пересчёт</span></div><input class="main-amount" id="sourceAmount" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" aria-label="Введите сумму" placeholder="0,00" value="1"><div class="chosen-currency"><span>Исходная валюта:</span><strong id="selectedCurrencyLabel">USD · Доллар США</strong></div><div id="currencyPicker" class="currency-picker" role="group" aria-label="Выберите исходную валюту"></div></div>
+<div class="results-head"><strong>Результат конвертации</strong><span id="resultsCaption">из 1 USD</span></div><div id="currencyList" class="currency-list" aria-label="Результаты конвертации"></div>
 <div class="list-footer"><span id="updatedLabel">Загружаем курсы…</span><button id="resetButton" type="button">Сбросить суммы ↺</button></div>
 </section>
 <section class="rate-panel glass" aria-label="Курс и источники"><div><div class="rate-title" id="pairTitle">Курс выбранной пары</div><div class="rate-main" id="pairRate">Проверяем источники…</div><div class="rate-detail" id="pairMeta">Используем среднее доступных котировок</div></div><span id="checkPill" class="check-pill">Проверка</span>
@@ -71,7 +102,7 @@ body:after{background:radial-gradient(ellipse at 12% 10%,color-mix(in srgb,var(-
 <div class="source-panel" id="sourcePanel" hidden><div class="source-row"><strong>ExchangeRate-API</strong><span id="sourcePrimary">Основной источник валют</span></div><div class="source-row"><strong>Frankfurter</strong><span id="sourceSecondary">Независимая сверка доступных валют</span></div><div class="source-row"><strong>Беларусбанк</strong><span id="sourceBelarusbank">Проверяем наличные курсы в Орше</span></div><div class="source-row"><strong>CoinGecko</strong><span id="sourceBTC">Bitcoin</span></div><div class="source-row"><strong>Gold-API</strong><span id="sourceGold">Золото</span></div><p class="source-note">Если для актива есть несколько независимых значений, конвертер усредняет доступные курсы в единой базе USD. Если доступен только один источник, используется он, а интерфейс это показывает. Источники могут обновляться с задержкой; справочные значения могут отличаться от банковских и биржевых цен.</p></div>
 </section>
 <div id="status" class="status" role="status" aria-live="polite">Подключаемся к источникам…</div>
-<div class="under-note"><svg viewBox="0 0 24 24"><path d="M12 3 21 20H3z"/><path d="M12 9v5m0 3h.01"/></svg><span>BTC — рыночная цена в USD. Золото (XAU) показано за 1 грамм. Банковские наличные курсы могут отличаться от рыночных. Все данные справочные.</span></div>
+<div class="under-note"><svg viewBox="0 0 24 24"><path d="M12 3 21 20H3z"/><path d="M12 9v5m0 3h.01"/></svg><span>Bitcoin показан по рыночной цене. Золото — за 1 грамм. Курс Беларусбанка, если доступен, может отличаться от среднего рыночного значения.</span></div>
 </main>
 <footer class="footer shell"><div class="author"><a class="author-logo" href="https://github.com/German-GPD" target="_blank" rel="noopener noreferrer" aria-label="GitHub German GPD">G</a><div class="author-copy"><strong>Сделано German / GPD</strong><small>Independent project · crafted with care</small></div></div><nav class="footer-links" aria-label="Ссылки автора"><a href="https://german-gpd.github.io/about-german/" target="_blank" rel="noopener noreferrer">Мой сайт ↗</a><a href="https://github.com/German-GPD/Cash-Converter" target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href="https://t.me/redfox_g56" target="_blank" rel="noopener noreferrer">Telegram ↗</a></nav><div class="footer-bottom"><span>© <span id="year"></span> German / GPD</span><span>Built for clarity, not noise.</span></div></footer>
 <div class="toast" id="toast" role="status"></div>
