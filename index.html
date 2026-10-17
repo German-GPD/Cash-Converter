@@ -264,6 +264,24 @@ html[data-theme="dark"] .ambient-b,html[data-theme="auto"] .ambient-b{background
 html[data-theme="dark"] .ambient-c,html[data-theme="auto"] .ambient-c{background:radial-gradient(circle,rgba(175,75,255,.2),transparent 70%)!important}
 html[data-theme="dark"] .hero h1,html[data-theme="auto"] .hero h1,html[data-theme="dark"] .main-amount,html[data-theme="auto"] .main-amount{font-family:var(--font)!important}
 
+
+/* CHROMATIC PARTICLE FIELD — 84 extra animated light fragments */
+.particle-cloud{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;contain:strict;perspective:900px}
+.fxbit{position:absolute;left:var(--x);top:var(--y);width:var(--s);height:var(--s);display:block;opacity:0;color:var(--c);background:var(--c);filter:drop-shadow(0 0 4px var(--c)) drop-shadow(0 0 11px var(--c));animation:bit-drift var(--t) var(--delay) ease-in-out infinite,bit-glitter calc(var(--t)*.31) var(--delay) ease-in-out infinite;will-change:transform,opacity}
+.fxbit.spark,.fxbit.star{background:transparent}
+.fxbit.spark:before,.fxbit.spark:after,.fxbit.star:before,.fxbit.star:after{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:currentColor;box-shadow:0 0 8px currentColor}
+.fxbit.spark:before{width:1px;height:calc(var(--s)*2.6)}.fxbit.spark:after{width:calc(var(--s)*2.6);height:1px}
+.fxbit.star:before{width:2px;height:calc(var(--s)*2.3)}.fxbit.star:after{width:calc(var(--s)*2.3);height:2px}
+.fxbit.dot{border-radius:50%;box-shadow:0 0 6px var(--c),0 0 16px var(--c)}
+.fxbit.diamond{clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);transform:rotate(var(--spin))}
+.fxbit.shard{clip-path:polygon(50% 0,100% 28%,67% 100%,0 68%);height:calc(var(--s)*2.2);transform:rotate(var(--spin))}
+.fxbit.slash{height:calc(var(--s)*3.8);width:1px;box-shadow:0 0 6px var(--c),0 0 15px var(--c);transform:rotate(28deg);background:linear-gradient(transparent,var(--c),white,var(--c),transparent)}
+.fxbit.ring{border:1px solid var(--c);background:transparent;border-radius:50%;box-shadow:inset 0 0 5px var(--c),0 0 10px var(--c)}
+@keyframes bit-drift{0%{transform:translate3d(0,24px,0) rotate(var(--spin)) scale(.45);opacity:0}12%{opacity:.8}32%{transform:translate3d(18px,-16px,0) rotate(calc(var(--spin) + 80deg)) scale(1.1);opacity:.48}55%{transform:translate3d(-22px,-48px,0) rotate(calc(var(--spin) + 190deg)) scale(.7);opacity:.92}78%{transform:translate3d(15px,-76px,0) rotate(calc(var(--spin) + 300deg)) scale(1.25);opacity:.4}100%{transform:translate3d(-10px,-115px,0) rotate(calc(var(--spin) + 420deg)) scale(.5);opacity:0}}
+@keyframes bit-glitter{0%,100%{filter:brightness(.7) drop-shadow(0 0 3px var(--c)) drop-shadow(0 0 7px var(--c))}48%{filter:brightness(2.4) drop-shadow(0 0 7px var(--c)) drop-shadow(0 0 18px var(--c))}63%{filter:brightness(1) drop-shadow(0 0 3px var(--c))}}
+@media(max-width:620px){.particle-cloud{opacity:.82}.fxbit:nth-child(4n){display:none}}
+@media(prefers-reduced-motion:reduce){.particle-cloud{display:none}.fxbit{animation:none!important}}
+
 </style>
 <script src="script.js" defer></script>
 </head>
@@ -276,6 +294,92 @@ html[data-theme="dark"] .hero h1,html[data-theme="auto"] .hero h1,html[data-them
 </div>
 <div class="prism-field" aria-hidden="true">
 <span class="prism p1"></span><span class="prism p2"></span><span class="prism p3"></span><span class="prism p4"></span><span class="prism p5"></span><span class="prism p6"></span><span class="prism p7"></span><span class="prism p8"></span><span class="prism p9"></span><span class="prism p10"></span><span class="prism p11"></span><span class="prism p12"></span><span class="prism p13"></span><span class="prism p14"></span><span class="prism p15"></span><span class="prism p16"></span><span class="prism p17"></span><span class="prism p18"></span><span class="prism p19"></span><span class="prism p20"></span><span class="prism p21"></span><span class="prism p22"></span><span class="prism p23"></span><span class="prism p24"></span>
+</div>
+<div class="particle-cloud" aria-hidden="true">
+<span class="fxbit spark" style="--x:6%;--y:9%;--s:3px;--t:7s;--delay:0s;--c:#52f7ff;--spin:0deg"></span>
+<span class="fxbit dot" style="--x:43%;--y:62%;--s:15px;--t:9s;--delay:-2s;--c:#ffffff;--spin:47deg"></span>
+<span class="fxbit diamond" style="--x:80%;--y:21%;--s:12px;--t:11s;--delay:0s;--c:#f5ff78;--spin:94deg"></span>
+<span class="fxbit star" style="--x:19%;--y:74%;--s:10px;--t:13s;--delay:-7s;--c:#ffbd59;--spin:141deg"></span>
+<span class="fxbit ring" style="--x:56%;--y:33%;--s:8px;--t:16s;--delay:-12s;--c:#e879ff;--spin:188deg"></span>
+<span class="fxbit spark" style="--x:93%;--y:86%;--s:6px;--t:19s;--delay:-17s;--c:#ff4fb8;--spin:235deg"></span>
+<span class="fxbit dot" style="--x:32%;--y:45%;--s:5px;--t:23s;--delay:-20s;--c:#62ffd0;--spin:282deg"></span>
+<span class="fxbit diamond" style="--x:69%;--y:4%;--s:4px;--t:27s;--delay:-23s;--c:#a17bff;--spin:329deg"></span>
+<span class="fxbit slash" style="--x:8%;--y:57%;--s:3px;--t:7s;--delay:-4s;--c:#46a8ff;--spin:16deg"></span>
+<span class="fxbit ring" style="--x:45%;--y:16%;--s:15px;--t:9s;--delay:0s;--c:#52f7ff;--spin:63deg"></span>
+<span class="fxbit spark" style="--x:82%;--y:69%;--s:12px;--t:11s;--delay:0s;--c:#ffffff;--spin:110deg"></span>
+<span class="fxbit dot" style="--x:21%;--y:28%;--s:10px;--t:13s;--delay:-4s;--c:#f5ff78;--spin:157deg"></span>
+<span class="fxbit slash" style="--x:58%;--y:81%;--s:8px;--t:16s;--delay:-4s;--c:#ffbd59;--spin:204deg"></span>
+<span class="fxbit slash" style="--x:95%;--y:40%;--s:6px;--t:19s;--delay:-10s;--c:#e879ff;--spin:251deg"></span>
+<span class="fxbit ring" style="--x:34%;--y:93%;--s:5px;--t:23s;--delay:-16s;--c:#ff4fb8;--spin:298deg"></span>
+<span class="fxbit spark" style="--x:71%;--y:52%;--s:4px;--t:27s;--delay:-3s;--c:#62ffd0;--spin:345deg"></span>
+<span class="fxbit shard" style="--x:10%;--y:11%;--s:3px;--t:7s;--delay:-1s;--c:#a17bff;--spin:32deg"></span>
+<span class="fxbit slash" style="--x:47%;--y:64%;--s:15px;--t:9s;--delay:-7s;--c:#46a8ff;--spin:79deg"></span>
+<span class="fxbit slash" style="--x:84%;--y:23%;--s:12px;--t:11s;--delay:0s;--c:#52f7ff;--spin:126deg"></span>
+<span class="fxbit ring" style="--x:23%;--y:76%;--s:10px;--t:13s;--delay:-1s;--c:#ffffff;--spin:173deg"></span>
+<span class="fxbit dot" style="--x:60%;--y:35%;--s:8px;--t:16s;--delay:-12s;--c:#f5ff78;--spin:220deg"></span>
+<span class="fxbit shard" style="--x:97%;--y:88%;--s:6px;--t:19s;--delay:-3s;--c:#ffbd59;--spin:267deg"></span>
+<span class="fxbit slash" style="--x:36%;--y:47%;--s:5px;--t:23s;--delay:-12s;--c:#e879ff;--spin:314deg"></span>
+<span class="fxbit slash" style="--x:73%;--y:6%;--s:4px;--t:27s;--delay:-10s;--c:#ff4fb8;--spin:1deg"></span>
+<span class="fxbit spark" style="--x:12%;--y:59%;--s:3px;--t:7s;--delay:-5s;--c:#62ffd0;--spin:48deg"></span>
+<span class="fxbit dot" style="--x:49%;--y:18%;--s:15px;--t:9s;--delay:-5s;--c:#a17bff;--spin:95deg"></span>
+<span class="fxbit shard" style="--x:86%;--y:71%;--s:12px;--t:11s;--delay:0s;--c:#46a8ff;--spin:142deg"></span>
+<span class="fxbit slash" style="--x:25%;--y:30%;--s:10px;--t:13s;--delay:-11s;--c:#52f7ff;--spin:189deg"></span>
+<span class="fxbit diamond" style="--x:62%;--y:83%;--s:8px;--t:16s;--delay:-4s;--c:#ffffff;--spin:236deg"></span>
+<span class="fxbit spark" style="--x:1%;--y:42%;--s:6px;--t:19s;--delay:-15s;--c:#f5ff78;--spin:283deg"></span>
+<span class="fxbit dot" style="--x:38%;--y:95%;--s:5px;--t:23s;--delay:-8s;--c:#ffbd59;--spin:330deg"></span>
+<span class="fxbit shard" style="--x:75%;--y:54%;--s:4px;--t:27s;--delay:-17s;--c:#e879ff;--spin:17deg"></span>
+<span class="fxbit star" style="--x:14%;--y:13%;--s:3px;--t:7s;--delay:-2s;--c:#ff4fb8;--spin:64deg"></span>
+<span class="fxbit diamond" style="--x:51%;--y:66%;--s:15px;--t:9s;--delay:-3s;--c:#62ffd0;--spin:111deg"></span>
+<span class="fxbit spark" style="--x:88%;--y:25%;--s:12px;--t:11s;--delay:0s;--c:#a17bff;--spin:158deg"></span>
+<span class="fxbit dot" style="--x:27%;--y:78%;--s:10px;--t:13s;--delay:-8s;--c:#46a8ff;--spin:205deg"></span>
+<span class="fxbit star" style="--x:64%;--y:37%;--s:8px;--t:16s;--delay:-12s;--c:#52f7ff;--spin:252deg"></span>
+<span class="fxbit star" style="--x:3%;--y:90%;--s:6px;--t:19s;--delay:-8s;--c:#ffffff;--spin:299deg"></span>
+<span class="fxbit diamond" style="--x:40%;--y:49%;--s:5px;--t:23s;--delay:-4s;--c:#f5ff78;--spin:346deg"></span>
+<span class="fxbit spark" style="--x:77%;--y:8%;--s:4px;--t:27s;--delay:-24s;--c:#ffbd59;--spin:33deg"></span>
+<span class="fxbit diamond" style="--x:16%;--y:61%;--s:3px;--t:7s;--delay:-6s;--c:#e879ff;--spin:80deg"></span>
+<span class="fxbit star" style="--x:53%;--y:20%;--s:15px;--t:9s;--delay:-1s;--c:#ff4fb8;--spin:127deg"></span>
+<span class="fxbit star" style="--x:90%;--y:73%;--s:12px;--t:11s;--delay:0s;--c:#62ffd0;--spin:174deg"></span>
+<span class="fxbit diamond" style="--x:29%;--y:32%;--s:10px;--t:13s;--delay:-5s;--c:#a17bff;--spin:221deg"></span>
+<span class="fxbit dot" style="--x:66%;--y:85%;--s:8px;--t:16s;--delay:-4s;--c:#46a8ff;--spin:268deg"></span>
+<span class="fxbit diamond" style="--x:5%;--y:44%;--s:6px;--t:19s;--delay:-1s;--c:#52f7ff;--spin:315deg"></span>
+<span class="fxbit star" style="--x:42%;--y:3%;--s:5px;--t:23s;--delay:0s;--c:#ffffff;--spin:2deg"></span>
+<span class="fxbit star" style="--x:79%;--y:56%;--s:4px;--t:27s;--delay:-4s;--c:#f5ff78;--spin:49deg"></span>
+<span class="fxbit spark" style="--x:18%;--y:15%;--s:3px;--t:7s;--delay:-3s;--c:#ffbd59;--spin:96deg"></span>
+<span class="fxbit dot" style="--x:55%;--y:68%;--s:15px;--t:9s;--delay:-8s;--c:#e879ff;--spin:143deg"></span>
+<span class="fxbit diamond" style="--x:92%;--y:27%;--s:12px;--t:11s;--delay:0s;--c:#ff4fb8;--spin:190deg"></span>
+<span class="fxbit star" style="--x:31%;--y:80%;--s:10px;--t:13s;--delay:-2s;--c:#62ffd0;--spin:237deg"></span>
+<span class="fxbit ring" style="--x:68%;--y:39%;--s:8px;--t:16s;--delay:-12s;--c:#a17bff;--spin:284deg"></span>
+<span class="fxbit spark" style="--x:7%;--y:92%;--s:6px;--t:19s;--delay:-13s;--c:#46a8ff;--spin:331deg"></span>
+<span class="fxbit dot" style="--x:44%;--y:51%;--s:5px;--t:23s;--delay:-19s;--c:#52f7ff;--spin:18deg"></span>
+<span class="fxbit diamond" style="--x:81%;--y:10%;--s:4px;--t:27s;--delay:-11s;--c:#ffffff;--spin:65deg"></span>
+<span class="fxbit slash" style="--x:20%;--y:63%;--s:3px;--t:7s;--delay:0s;--c:#f5ff78;--spin:112deg"></span>
+<span class="fxbit ring" style="--x:57%;--y:22%;--s:15px;--t:9s;--delay:-6s;--c:#ffbd59;--spin:159deg"></span>
+<span class="fxbit spark" style="--x:94%;--y:75%;--s:12px;--t:11s;--delay:0s;--c:#e879ff;--spin:206deg"></span>
+<span class="fxbit dot" style="--x:33%;--y:34%;--s:10px;--t:13s;--delay:-12s;--c:#ff4fb8;--spin:253deg"></span>
+<span class="fxbit slash" style="--x:70%;--y:87%;--s:8px;--t:16s;--delay:-4s;--c:#62ffd0;--spin:300deg"></span>
+<span class="fxbit slash" style="--x:9%;--y:46%;--s:6px;--t:19s;--delay:-6s;--c:#a17bff;--spin:347deg"></span>
+<span class="fxbit ring" style="--x:46%;--y:5%;--s:5px;--t:23s;--delay:-15s;--c:#46a8ff;--spin:34deg"></span>
+<span class="fxbit spark" style="--x:83%;--y:58%;--s:4px;--t:27s;--delay:-18s;--c:#52f7ff;--spin:81deg"></span>
+<span class="fxbit shard" style="--x:22%;--y:17%;--s:3px;--t:7s;--delay:-4s;--c:#ffffff;--spin:128deg"></span>
+<span class="fxbit slash" style="--x:59%;--y:70%;--s:15px;--t:9s;--delay:-4s;--c:#f5ff78;--spin:175deg"></span>
+<span class="fxbit slash" style="--x:96%;--y:29%;--s:12px;--t:11s;--delay:0s;--c:#ffbd59;--spin:222deg"></span>
+<span class="fxbit ring" style="--x:35%;--y:82%;--s:10px;--t:13s;--delay:-9s;--c:#e879ff;--spin:269deg"></span>
+<span class="fxbit dot" style="--x:72%;--y:41%;--s:8px;--t:16s;--delay:-12s;--c:#ff4fb8;--spin:316deg"></span>
+<span class="fxbit shard" style="--x:11%;--y:94%;--s:6px;--t:19s;--delay:-18s;--c:#62ffd0;--spin:3deg"></span>
+<span class="fxbit slash" style="--x:48%;--y:53%;--s:5px;--t:23s;--delay:-11s;--c:#a17bff;--spin:50deg"></span>
+<span class="fxbit slash" style="--x:85%;--y:12%;--s:4px;--t:27s;--delay:-25s;--c:#46a8ff;--spin:97deg"></span>
+<span class="fxbit spark" style="--x:24%;--y:65%;--s:3px;--t:7s;--delay:-1s;--c:#52f7ff;--spin:144deg"></span>
+<span class="fxbit dot" style="--x:61%;--y:24%;--s:15px;--t:9s;--delay:-2s;--c:#ffffff;--spin:191deg"></span>
+<span class="fxbit shard" style="--x:98%;--y:77%;--s:12px;--t:11s;--delay:0s;--c:#f5ff78;--spin:238deg"></span>
+<span class="fxbit slash" style="--x:37%;--y:36%;--s:10px;--t:13s;--delay:-6s;--c:#ffbd59;--spin:285deg"></span>
+<span class="fxbit diamond" style="--x:74%;--y:89%;--s:8px;--t:16s;--delay:-4s;--c:#e879ff;--spin:332deg"></span>
+<span class="fxbit spark" style="--x:13%;--y:48%;--s:6px;--t:19s;--delay:-11s;--c:#ff4fb8;--spin:19deg"></span>
+<span class="fxbit dot" style="--x:50%;--y:7%;--s:5px;--t:23s;--delay:-7s;--c:#62ffd0;--spin:66deg"></span>
+<span class="fxbit shard" style="--x:87%;--y:60%;--s:4px;--t:27s;--delay:-5s;--c:#a17bff;--spin:113deg"></span>
+<span class="fxbit star" style="--x:26%;--y:19%;--s:3px;--t:7s;--delay:-5s;--c:#46a8ff;--spin:160deg"></span>
+<span class="fxbit diamond" style="--x:63%;--y:72%;--s:15px;--t:9s;--delay:0s;--c:#52f7ff;--spin:207deg"></span>
+<span class="fxbit spark" style="--x:2%;--y:31%;--s:12px;--t:11s;--delay:0s;--c:#ffffff;--spin:254deg"></span>
+<span class="fxbit dot" style="--x:39%;--y:84%;--s:10px;--t:13s;--delay:-3s;--c:#f5ff78;--spin:301deg"></span>
 </div>
 <header class="topbar shell">
 <a class="brand" href="./" aria-label="Cash Converter"><span class="brand-icon">↔</span><span class="brand-title">Cash Converter<small>BY GERMAN / GPD</small></span></a>
