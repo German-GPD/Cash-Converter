@@ -279,6 +279,57 @@ html[data-theme="light"]{--bg:#f2f3ee;--panel:rgba(255,255,252,.88);--panel-soli
  .market-live{margin:0}.market-section{margin-top:46px;padding-top:27px}
 }
 @media(prefers-reduced-motion:reduce){.chart-card{animation:none!important;transition:none!important}}
+
+/* PRISM / LIQUID GLASS — sharp-edged premium revision */
+:root{--radius:0px;--line:rgba(221,255,205,.18);--accent:#caff83;--accent-soft:rgba(202,255,131,.075)}
+html[data-theme="dark"],html[data-theme="auto"]{--bg:#030504;--panel:rgba(13,18,15,.48);--panel-solid:#0b100d;--line:rgba(206,255,221,.17);--accent:#caff83;--accent-soft:rgba(202,255,131,.075);--shadow:0 30px 100px rgba(0,0,0,.5)}
+html[data-theme="light"]{--bg:#eef2ee;--panel:rgba(255,255,255,.48);--panel-solid:#fdfefd;--line:rgba(24,54,39,.16);--accent:#347e56;--accent-soft:rgba(52,126,86,.075);--shadow:0 24px 80px rgba(20,45,30,.08)}
+body{isolation:isolate}
+body:before{opacity:.2;background-size:44px 44px}
+body:after{opacity:.8;background:radial-gradient(ellipse at 15% 12%,rgba(77,255,194,.09),transparent 34%),radial-gradient(ellipse at 88% 25%,rgba(128,92,255,.09),transparent 33%),radial-gradient(ellipse at 60% 78%,rgba(255,79,181,.045),transparent 36%)}
+.glass,.converter.glass,.rate-panel.glass,.chart-card{position:relative;background:linear-gradient(132deg,rgba(255,255,255,.085),rgba(255,255,255,.018) 38%,rgba(255,255,255,.035)),var(--panel);border:1px solid var(--line);border-radius:0!important;box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.13),inset 1px 0 0 rgba(255,255,255,.035);backdrop-filter:blur(32px) saturate(155%);-webkit-backdrop-filter:blur(32px) saturate(155%)}
+.glass:after,.chart-card:after{content:"";position:absolute;inset:0;pointer-events:none;border:1px solid rgba(255,255,255,.035);background:linear-gradient(115deg,rgba(255,255,255,.055),transparent 22%,transparent 72%,rgba(255,255,255,.025));clip-path:polygon(0 0,100% 0,100% 100%,0 100%)}
+.brand-icon,.square-button,.currency-icon,.author-logo,.theme-switch,.theme-choice,.badge,.check-pill,.market-live,.currency-chip,.copy-button,.currency-row,.chart-asset-icon,.chart-change{border-radius:0!important}
+.converter-head,.input-zone,.results-head,.currency-row,.rate-panel,.chart-card{border-color:var(--line)}
+.currency-row{background:rgba(255,255,255,.018);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.currency-row.active{background:linear-gradient(100deg,rgba(202,255,131,.10),rgba(255,255,255,.018));box-shadow:inset 2px 0 var(--accent)}
+.theme-choice[aria-pressed="true"],.currency-chip[aria-pressed="true"]{box-shadow:inset 0 -2px var(--accent)}
+.chart-card{overflow:hidden}
+.chart-card:before{height:1px;opacity:1;background:linear-gradient(90deg,transparent,var(--chart-color),#fff,var(--accent),transparent);background-size:220% 100%;animation:prism-edge 5s linear infinite}
+.chart-spark{border-radius:0!important}
+.prism-field{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;contain:strict;perspective:800px}
+.prism{position:absolute;display:block;left:var(--x);top:115%;width:var(--w);height:var(--h);opacity:0;transform:translate3d(0,0,0) rotate(var(--r));background:linear-gradient(135deg,rgba(255,255,255,.98),var(--c) 22%,rgba(255,255,255,.12) 48%,var(--c) 70%,transparent);clip-path:polygon(50% 0,100% 38%,67% 100%,0 63%);filter:drop-shadow(0 0 5px var(--c)) drop-shadow(0 0 15px var(--c));animation:prism-flight var(--dur) var(--delay) linear infinite,prism-flash var(--blink) var(--delay) ease-in-out infinite;will-change:transform,opacity}
+.prism:after{content:"";position:absolute;left:48%;top:-180%;width:2px;height:260%;background:linear-gradient(transparent,var(--c),rgba(255,255,255,.95),transparent);box-shadow:0 0 9px var(--c),0 0 22px var(--c);transform:rotate(18deg);transform-origin:bottom;opacity:.75}
+.p1{--x:4%;--w:7px;--h:22px;--r:38deg;--c:#76ffd6;--dur:13s;--delay:-7s;--blink:2.2s}
+.p2{--x:12%;--w:4px;--h:12px;--r:62deg;--c:#c7ff65;--dur:17s;--delay:-12s;--blink:1.5s}
+.p3{--x:20%;--w:10px;--h:31px;--r:22deg;--c:#a28aff;--dur:19s;--delay:-4s;--blink:2.8s}
+.p4{--x:29%;--w:3px;--h:9px;--r:71deg;--c:#fff;--dur:11s;--delay:-9s;--blink:1.1s}
+.p5{--x:37%;--w:6px;--h:18px;--r:42deg;--c:#ff78c9;--dur:15s;--delay:-2s;--blink:2.4s}
+.p6{--x:45%;--w:12px;--h:35px;--r:17deg;--c:#78cfff;--dur:22s;--delay:-16s;--blink:1.7s}
+.p7{--x:54%;--w:4px;--h:13px;--r:65deg;--c:#d8ff78;--dur:14s;--delay:-5s;--blink:2.1s}
+.p8{--x:62%;--w:8px;--h:25px;--r:28deg;--c:#ffb86b;--dur:18s;--delay:-13s;--blink:1.3s}
+.p9{--x:70%;--w:3px;--h:10px;--r:55deg;--c:#86ffe4;--dur:12s;--delay:-8s;--blink:2.6s}
+.p10{--x:79%;--w:11px;--h:32px;--r:31deg;--c:#a18aff;--dur:20s;--delay:-3s;--blink:1.6s}
+.p11{--x:87%;--w:5px;--h:16px;--r:72deg;--c:#ff78a8;--dur:16s;--delay:-11s;--blink:2.3s}
+.p12{--x:95%;--w:8px;--h:24px;--r:18deg;--c:#caff83;--dur:21s;--delay:-17s;--blink:1.4s}
+.p13{--x:8%;--w:3px;--h:8px;--r:49deg;--c:#ffdc78;--dur:10s;--delay:-3s;--blink:1.3s}
+.p14{--x:17%;--w:7px;--h:20px;--r:12deg;--c:#72bfff;--dur:23s;--delay:-19s;--blink:2.7s}
+.p15{--x:34%;--w:4px;--h:14px;--r:83deg;--c:#d1ff75;--dur:12s;--delay:-6s;--blink:1.2s}
+.p16{--x:41%;--w:9px;--h:27px;--r:33deg;--c:#ff7bde;--dur:18s;--delay:-14s;--blink:2.1s}
+.p17{--x:58%;--w:5px;--h:15px;--r:58deg;--c:#fff;--dur:13s;--delay:-10s;--blink:1.6s}
+.p18{--x:66%;--w:3px;--h:9px;--r:21deg;--c:#83ffb0;--dur:16s;--delay:-1s;--blink:2.5s}
+.p19{--x:74%;--w:7px;--h:23px;--r:43deg;--c:#ffad75;--dur:19s;--delay:-15s;--blink:1.4s}
+.p20{--x:83%;--w:4px;--h:11px;--r:67deg;--c:#9c8aff;--dur:11s;--delay:-5s;--blink:2.4s}
+.p21{--x:91%;--w:10px;--h:29px;--r:27deg;--c:#7df4ff;--dur:22s;--delay:-18s;--blink:1.8s}
+.p22{--x:24%;--w:5px;--h:17px;--r:36deg;--c:#caff83;--dur:17s;--delay:-8s;--blink:1.3s}
+.p23{--x:49%;--w:3px;--h:10px;--r:74deg;--c:#ff72a8;--dur:12s;--delay:-4s;--blink:2.7s}
+.p24{--x:97%;--w:6px;--h:19px;--r:46deg;--c:#a2ffdf;--dur:15s;--delay:-12s;--blink:1.5s}
+@keyframes prism-flight{0%{transform:translate3d(0,15vh,0) rotate(var(--r)) scale(.55);opacity:0}7%{opacity:.95}23%{transform:translate3d(-22px,-8vh,0) rotate(calc(var(--r) + 90deg)) scale(1.05);opacity:.7}48%{transform:translate3d(24px,-38vh,0) rotate(calc(var(--r) + 220deg)) scale(.7);opacity:.9}72%{transform:translate3d(-16px,-69vh,0) rotate(calc(var(--r) + 390deg)) scale(1.15);opacity:.55}94%{opacity:.9}100%{transform:translate3d(30px,-125vh,0) rotate(calc(var(--r) + 560deg)) scale(.4);opacity:0}}
+@keyframes prism-flash{0%,100%{filter:brightness(.7) drop-shadow(0 0 4px var(--c)) drop-shadow(0 0 9px var(--c))}42%{filter:brightness(1.8) drop-shadow(0 0 9px var(--c)) drop-shadow(0 0 24px var(--c))}55%{filter:brightness(1.1) drop-shadow(0 0 4px var(--c))}62%{filter:brightness(2.2) drop-shadow(0 0 12px var(--c)) drop-shadow(0 0 30px var(--c))}}
+@keyframes prism-edge{0%{background-position:100% 0}100%{background-position:-120% 0}}
+@media(max-width:620px){.prism:nth-child(3n){display:none}.prism-field{opacity:.78}.glass,.converter.glass,.rate-panel.glass,.chart-card{backdrop-filter:blur(22px) saturate(140%);-webkit-backdrop-filter:blur(22px) saturate(140%)}}
+@media(prefers-reduced-motion:reduce){.prism,.chart-card:before{animation:none!important}.prism-field{display:none}}
+
 </style>
 <script src="script.js" defer></script>
 </head>
@@ -288,6 +339,9 @@ html[data-theme="light"]{--bg:#f2f3ee;--panel:rgba(255,255,252,.88);--panel-soli
 <span class="fx-orbit fx-orbit-one"></span><span class="fx-orbit fx-orbit-two"></span>
 <span class="fx-particle particle-one">✦</span><span class="fx-particle particle-two">◇</span><span class="fx-particle particle-three">·</span><span class="fx-particle particle-four">✧</span>
 <span class="fx-shard shard-one"></span><span class="fx-shard shard-two"></span><span class="fx-streak streak-one"></span><span class="fx-streak streak-two"></span>
+</div>
+<div class="prism-field" aria-hidden="true">
+<span class="prism p1"></span><span class="prism p2"></span><span class="prism p3"></span><span class="prism p4"></span><span class="prism p5"></span><span class="prism p6"></span><span class="prism p7"></span><span class="prism p8"></span><span class="prism p9"></span><span class="prism p10"></span><span class="prism p11"></span><span class="prism p12"></span><span class="prism p13"></span><span class="prism p14"></span><span class="prism p15"></span><span class="prism p16"></span><span class="prism p17"></span><span class="prism p18"></span><span class="prism p19"></span><span class="prism p20"></span><span class="prism p21"></span><span class="prism p22"></span><span class="prism p23"></span><span class="prism p24"></span>
 </div>
 <header class="topbar shell">
 <a class="brand" href="./" aria-label="Cash Converter"><span class="brand-icon">↔</span><span class="brand-title">Cash Converter<small>BY GERMAN / GPD</small></span></a>
