@@ -218,12 +218,67 @@ body:after{background:radial-gradient(ellipse at 50% -18%,color-mix(in srgb,var(
 .chart-spark .spark-line,.chart-spark .spark-single{fill:none;stroke:var(--chart-color);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
 .chart-spark .spark-single{stroke-width:2;stroke-dasharray:3 4;opacity:.95}
 .chart-spark circle{fill:var(--chart-color);stroke:var(--panel-solid);stroke-width:2}
-.chart-change{border-radius:5px;background:color-mix(in srgb,var(--chart-color) 10%,transparent);color:var(--chart-color)}
+.chart-change{border-radius:5px;background:color-mix(in srgb,var(--chart-color) 10%,transparent);color:var(--chart-color)}.chart-empty{height:86px;display:flex;align-items:center;justify-content:center;margin-top:14px;border-block:1px solid var(--line);color:var(--muted);font-size:10px;text-align:center}.chart-change.up{color:var(--good)}.chart-change.down{color:var(--bad)}
 .chart-change.neutral{color:var(--muted);background:var(--soft)}.chart-disclaimer{border-left:2px solid var(--accent);background:var(--soft);padding:11px 13px;border-radius:0 7px 7px 0}
 .footer{border-top-color:var(--line)}.footer-bottom{border-top-color:var(--line)}
 @media(max-width:520px){.chart-grid{grid-template-columns:1fr}.chart-card{padding:15px 14px 12px}.chart-price{font-size:26px}.chart-spark{height:52px}.result-amount{font-size:clamp(21px,5.4vw,26px)}}
 @media(prefers-reduced-motion:reduce){.chart-card,.chart-light,.market-live i,.ambient,.orbit{animation:none!important;transition:none!important}}
 
+
+/* Cash Converter — refined editorial OLED system */
+:root{--radius:16px;--accent:#c3f27a;--line:rgba(195,242,122,.16);--shadow:0 28px 90px rgba(0,0,0,.42)}
+html[data-theme="dark"],html[data-theme="auto"]{--bg:#050605;--panel:rgba(13,16,12,.94);--panel-solid:#0b0e0a;--line:rgba(195,242,122,.16);--accent:#c3f27a;--accent-soft:rgba(195,242,122,.085);--shadow:0 28px 90px rgba(0,0,0,.48)}
+html[data-theme="light"]{--bg:#f2f3ee;--panel:rgba(255,255,252,.88);--panel-solid:#fff;--line:rgba(39,54,30,.13);--accent:#547b2e;--accent-soft:rgba(84,123,46,.09);--shadow:0 24px 70px rgba(30,40,22,.07)}
+.shell{width:min(100% - 40px,880px)}
+.topbar{height:82px}
+.brand-icon{width:42px;height:42px;font-size:25px;border-radius:13px}
+.brand-title{font-size:16px;letter-spacing:-.6px}
+.hero{padding:62px 0 30px}
+.hero h1{font-size:clamp(42px,7vw,66px);letter-spacing:-3.6px;line-height:1.02}
+.hero p{font-size:14px;max-width:540px}
+.converter.glass,.rate-panel.glass{border-radius:18px}
+.converter-head{padding:23px 24px 18px}
+.converter-head h2{font-size:21px}
+.input-zone{padding:24px}
+.main-amount{font-size:clamp(38px,7vw,58px);padding:8px 0 16px}
+.currency-chip{padding:9px 12px}
+.currency-row{padding:15px 16px;min-height:82px;border-radius:10px}
+.currency-icon{width:44px;height:44px}
+.result-amount{font-size:clamp(25px,3.6vw,32px)}
+.rate-panel{margin-top:16px;padding:21px;border-radius:16px}
+.market-section{margin-top:62px;padding-top:34px}
+.market-heading{display:flex;justify-content:space-between;align-items:end;gap:18px}
+.market-heading h2{font-size:clamp(30px,4.5vw,40px);letter-spacing:-1.5px}
+.market-heading p{font-size:12px}
+.market-live{flex-shrink:0;margin-bottom:6px}
+.chart-summary{margin:18px 0 14px;font-size:11px;color:var(--muted)}
+.chart-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.chart-card{min-width:0;padding:20px 20px 16px;border-radius:15px;overflow:hidden;box-shadow:inset 0 1px 0 rgba(255,255,255,.035);transition:transform .25s,border-color .25s,background .25s}
+.chart-card:before{height:2px;opacity:.95}
+.chart-card:hover{transform:translateY(-3px);background:color-mix(in srgb,var(--panel) 88%,var(--chart-color) 12%)}
+.chart-asset-icon{width:39px;height:39px;border-radius:11px;font-size:18px}
+.chart-code{font-size:12px;letter-spacing:1.5px}
+.chart-name{font-size:10px}
+.chart-price{margin-top:22px;font-size:clamp(25px,3.5vw,34px);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.chart-price small{font-size:9px}
+.chart-spark{display:block;width:100%;height:86px;margin-top:14px;padding:8px 0;overflow:hidden;border:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.chart-spark path{vector-effect:non-scaling-stroke}
+.chart-spark .spark-grid{stroke-dasharray:2 5;opacity:.8}
+.chart-spark .spark-line{stroke-width:2.2}
+.chart-foot{margin-top:13px;gap:8px;flex-wrap:wrap}
+.chart-change{padding:6px 8px;font-variant-numeric:tabular-nums}
+.chart-disclaimer{margin-top:18px;line-height:1.7;border-radius:0 9px 9px 0}
+.footer{margin-top:36px;padding-top:25px}
+@media(max-width:620px){
+ .shell{width:calc(100% - 24px)}.topbar{height:70px}.top-actions{gap:6px}.live{max-width:95px}
+ .hero{padding:42px 0 24px}.hero h1{font-size:clamp(39px,11vw,54px);letter-spacing:-2.5px}
+ .converter-head{padding:18px 15px 15px}.input-zone{padding:17px}.main-amount{font-size:43px}
+ .currency-row{padding:12px 8px;min-height:72px}.currency-row .currency-info{gap:8px}
+ .chart-grid{grid-template-columns:1fr;gap:12px}.chart-card{padding:18px}.chart-spark{height:74px}
+ .chart-price{font-size:30px}.market-heading{align-items:start;flex-direction:column;gap:10px}
+ .market-live{margin:0}.market-section{margin-top:46px;padding-top:27px}
+}
+@media(prefers-reduced-motion:reduce){.chart-card{animation:none!important;transition:none!important}}
 </style>
 <script src="script.js" defer></script>
 </head>
